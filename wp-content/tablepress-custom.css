@@ -1,0 +1,71 @@
+.dataTables_filter input {
+	padding: 5px;
+}
+
+.dataTables_length select {
+	padding: 5px;
+}
+
+#tablepress-6 {
+	border: 1px solid #dee2e6 !important;
+}
+
+.tablepress-id-1 {
+	margin-top: 50px;
+}
+
+.tablepress .row-1 .column-1,
+.tablepress .row-1 .column-2,
+.tablepress .row-1 .column-3,
+.tablepress .row-1 .column-4,
+.tablepress .row-1 .column-5 {
+	background-color: #212d45;
+	color: white;
+	padding: 15px;
+}
+
+.tablepress .row-2 .column-1,
+.tablepress .row-2 .column-2,
+.tablepress .row-2 .column-3,
+.tablepress .row-2 .column-4,
+.tablepress .row-2 .column-5 {
+	padding: 15px;
+}
+
+.tablepress .row-3 .column-1,
+.tablepress .row-3 .column-2,
+.tablepress .row-3 .column-3,
+.tablepress .row-3 .column-4,
+.tablepress .row-3 .column-5 {
+	padding: 15px;
+}
+
+.tablepress .row-4 .column-1,
+.tablepress .row-4 .column-2,
+.tablepress .row-4 .column-3,
+.tablepress .row-4 .column-4,
+.tablepress .row-4 .column-5 {
+	padding: 15px;
+}
+
+.investor-service-table {
+	border-radius: 20px;
+	border: 1px solid #c3c4c7;
+}
+
+.investor-service-table tr .column-1,
+.investor-service-table tr .column-3 {
+	text-align: center;
+}
+
+.investor-service-table tr td {
+	border-right: 1px solid #c3c4c7;
+}
+
+.tablepress-id-3 {
+	margin-top: 20px;
+}
+
+.tablepress-id-3 thead .row-1 {
+	line-height: 1rem;
+}

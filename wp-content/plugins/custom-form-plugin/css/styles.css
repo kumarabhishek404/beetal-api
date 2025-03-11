@@ -1,0 +1,600 @@
+.ipo_status_details_form {
+  display: flex;
+  gap: 20px;
+  flex: 1;
+}
+
+#show_allotment_result p{
+  font-size: large;
+  line-height: 1.5rem;
+}
+
+.text-blue {
+  color: #212d45 !important;
+}
+div .bg-blue {
+  background-color: #212d45 !important;
+  border-color: #212d45 !important;
+}
+div .bg-blue-light {
+  background-color: #007bff !important;
+  border-color: #007bff !important;
+}
+
+.ipo_status_details_form .tds-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0px 20px;
+}
+
+.ipo_status_details_form .tds-form p {
+  flex: 1 1 calc(50% - 20px);
+  display: flex;
+  flex-direction: column;
+}
+
+.ipo_status_details_form .tds-form p span {
+  font-size: smaller;
+  line-height: 1rem;
+}
+
+.ipo_status_details_form .tds-form p label {
+  padding-bottom: 5px;
+}
+
+.company_name {
+  flex-basis: 100%;
+}
+
+.ipo-handle-form .column {
+  display: flex;
+  flex-direction: column;
+}
+
+.radio-button-group {
+  display: flex;
+  flex-direction: column;
+  margin: 20px 0px;
+}
+
+.radio-button-items {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding-bottom: 5px;
+}
+
+.radio-button-item {
+  display: flex;
+  align-items: center;
+}
+
+.radio-button-items label {
+  margin-left: 5px;
+  white-space: nowrap;
+}
+
+.menu-active {
+  background-color: #ffffff !important;
+  color: black !important;
+  border-color: #fff !important;
+}
+
+.menu-active i {
+  color: #212d45 !important;
+}
+
+input[type="radio"]:checked {
+  background-color: #212d45 !important;
+}
+
+.ipo-handle-form .column label {
+  padding-bottom: 5px;
+}
+
+.tax-forms-table {
+  width: 100%;
+  border-collapse: collapse;
+  /* margin-top: 20px; */
+}
+
+.tax-forms-table th,
+.tax-forms-table td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+.tax-forms-table th {
+  background-color: #212d45;
+  font-weight: bold;
+  color: white !important;
+  /* border-color: #212d45 !important; */
+}
+
+.tax-forms-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.tax-forms-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+.submit input[type="submit"] {
+  font-weight: 500;
+  flex-basis: 100% !important;
+  padding: 1.2rem;
+  margin-top: 1rem;
+  width: 100%;
+}
+
+input[type="submit"]:hover {
+  color: white;
+}
+
+.file_type {
+  flex-basis: 100% !important;
+}
+
+input[type="file"],
+input[type="text"],
+input[type="submit"],
+input[type="email"],
+input[type="number"],
+select,
+input[type="password"] {
+  border-radius: 8px;
+  padding: 10px;
+}
+
+input[type="file"] {
+  border: 1px solid #dddddd;
+  color: #666;
+  background-color: #fafafa;
+}
+
+.ipo-allotment-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.ipo-allotment-form .Option-field {
+  display: flex;
+  justify-content: space-between;
+}
+
+.ipo-allotment-form .Option-field .option-sub-field {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+}
+
+.ipo-allotment-form .Option-field .option-sub-field p {
+  font-size: smaller;
+}
+
+.full-field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0 !important;
+}
+
+.ipo-allotment-form label {
+  margin-bottom: 5px;
+}
+
+.or-text {
+  display: flex;
+  align-items: center;
+}
+
+.submit-btn input[type="submit"] {
+  /* width: 100%; */
+  padding: 12px 24px;
+}
+
+.required-label::after {
+  content: " *";
+  color: red;
+  /* font-weight: bold; */
+}
+
+.option-sub-field input {
+  width: 100%;
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  /* Space between tags */
+  max-width: 460px;
+  /* Adjust width as needed */
+  margin: 0 auto;
+  /* Center alignment */
+  justify-content: center;
+}
+
+.tag {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background-color: #dee2e6;
+  /* Tag background color */
+  color: black;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 8px 12px;
+  border-radius: 16px;
+  /* Rounded corners */
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  /* Subtle shadow */
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.tag svg {
+  margin-left: 10px;
+  height: 20px;
+}
+
+.tag:hover {
+  /* background-color: #ffc03d; */
+  transform: scale(1.1);
+  /* Slight zoom on hover */
+}
+
+.tags-container .tag:nth-child(odd) {
+  background-color: #212d45;
+  /* Alternate background color for odd tags */
+  color: white !important;
+}
+
+.card-container {
+  margin: 0 auto;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.card-header {
+  display: flex;
+  justify-content: center;
+  background-color: #fff;
+  color: black;
+  padding: 0;
+  border-bottom: 1px solid whitesmoke;
+}
+
+.tab-header {
+  width: 100%;
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+}
+
+.tab {
+  width: 100%;
+  cursor: pointer;
+  padding: 10px 20px;
+  font-weight: bold;
+  transition: background-color 0.3s;
+  text-align: center;
+}
+
+.tab.active {
+  background-color: #ffffff;
+  color: white;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  background-color: #212d45;
+  color: black;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #212d45;
+  color: white;
+}
+
+.otp-section {
+  display: none;
+}
+
+select {
+  padding: 10px !important;
+  padding-right: 35px !important;
+}
+
+.card {
+  border: none;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.card-image {
+  width: 200px;
+  /* height: 200px; */
+  /* object-fit: cover; */
+  border-radius: 10px 0 0 10px;
+}
+
+.card-content {
+  padding-left: 20px;
+}
+
+.hidden {
+  display: none;
+}
+
+.error {
+  color: red;
+  font-size: smaller;
+  font-weight: 400;
+  margin: 0;
+}
+
+.menu-items:hover {
+  background-color: #adb5bd;
+  color: white;
+}
+
+hr {
+  color: white !important;
+}
+
+input:focus {
+  outline: 1px solid #adb5bd !important;
+  border: 0 !important;
+}
+
+.success-message {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  background-color: #28a745;
+  color: #fff;
+  padding: 10px 20px;
+  border: 1px solid #218838;
+  border-radius: 5px;
+  z-index: 99;
+  white-space: nowrap;
+}
+
+div .bg-blue {
+background: #212d45 !important;
+  color: white !important;
+  border-color: #212d45 !important;
+}
+
+.btn-blue{
+  background: #212d45 !important;
+  color: white !important;
+  border-color: #212d45 !important;
+  padding: 10px !important;
+}
+
+@media (max-width: 768px) {
+
+  .border-bottom-mobile{
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  div .border-mobile{
+    border-bottom: 0px !important;
+  }
+
+  #right-section {
+    width: 100%;
+    justify-content: center;
+  }
+
+  #right-section h3 {
+    text-align: center;
+  }
+
+  #right-section .card-body .card-text,
+  #right-section .card-body .card-title {
+    text-align: center;
+  }
+
+  #left-section {
+    /* padding-top: 2rem !important;
+    padding-bottom: 2rem !important; */
+  }
+
+  .rotate-icon {
+    transform: rotate(180deg);
+    /* transition: transform 0.1s ease; */
+  }
+}
+
+.disabled-button {
+    background-color: #212d45c4; /* Light gray or any desired color */
+    pointer-events: none; /* Disable mouse events */
+    opacity: 0.6; /* Make button slightly transparent */
+}
+
+.select2-selection__arrow {
+  top: 18% !important;
+}
+
+.select2-container .select2-selection--single {
+  height: 45.5px !important;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 2.8px;
+  border-radius: 8px !important;
+  border: 1px solid #dddddd !important;
+  background-color: #f8f9fa !important;
+}
+
+.height-recent-circle{
+  min-height: 80px; 
+  min-width: 80px; 
+  height: 80px; 
+  width: 80px;
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .height-recent-circle{
+  min-height: 60px !important; 
+  min-width: 60px !important; 
+  height: 60px !important; 
+  width: 60px !important;
+}
+}
+
+@media (max-width: 768px) {
+  .select2-container {
+    width: 100% !important;
+  }
+
+  .select2-selection__rendered {
+    font-size: 14px;
+  }
+
+  .select2-selection {
+    height: 40px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .select2-container {
+    width: 100% !important;
+  }
+
+  .select2-selection__rendered {
+    font-size: 12px;
+  }
+}
+
+.registration-details-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.registration-details-table th, .registration-details-table td {
+    border: 1px solid #ddd; /* Light gray borders */
+    padding: 8px;
+    text-align: left;
+}
+
+.registration-details-table th {
+    background-color: #212d45;
+    color: white;
+}
+
+.registration-details-table ul {
+    list-style-type: disc;
+    margin-left: 20px;
+}
+
+.ast-below-header-wrap {
+    position: absolute;
+    width: 100%;
+}
+
+/* Initial state - header is hidden above */
+.sticky-header {
+    position: fixed;
+    top: -100px; /* Start hidden above the viewport */
+    width: 100%;
+    z-index: 999;
+    background: #212d45;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    border-bottom:2px solid white;
+    animation: none; /* Initially, no animation */
+}
+
+/* Animation for slide-down effect */
+@keyframes slideDown {
+    0% {
+        top: -100px; /* Start above the viewport */
+            opacity:0;
+    }
+    100% {
+        top: -20px; /* End at the top of the viewport */
+            opacity:1;
+    }
+}
+
+/* Sticky state - header appears at top with animation */
+.sticky-header.visible {
+    animation: slideDown 1s ease-in-out forwards; /* Slide down animation */
+}
+
+.ast-header-html-2{
+    display:none;
+}
+
+.border-blue-2 {
+  border: 2px solid #007bff;
+}
+
+.loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loader {
+  border: 6px solid #f3f3f3; /* Light grey */
+  border-top: 6px solid #212d45; /* Blue */
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1.2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
