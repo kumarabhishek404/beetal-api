@@ -3,34 +3,44 @@ jQuery(document).ready(async function ($) {
     function sendOTPfn(email) {
         console.log(`sendOTPfn: ${email}`);
         $.ajax({
-            url: ajaxurl,
-            method: "POST",
-            data: {
-                action: "send_otp",
-                type: "email",
-                recipient: email,
-            },
-            success: function (response) {
-                // cfpShowSuccessMessage(response.data);
-                $("#cfp-company-login-form").append(`
+          url: ajaxurl,
+          method: "POST",
+          data: {
+            action: "send_otp",
+            type: "email",
+            recipient: email,
+            login_by: "company login",
+          },
+          success: function (response) {
+            if (response.success) {
+              $("#company_login_error_msg").html(`
                     <div id="form-message" style="color: #218838; margin-top: 10px; margin-bottom: 10px;">
                         ${response.data}
                     </div>
                 `);
-                $(".company_login_send_otp_loader").hide();
-                $(".company_resend_otp_btn").show();
-                $("#show-company-login-form-otp").show();
-            },
-            error: function () {
-                // cfpShowErrorMessage();
-                $("#cfp-company-login-form").append(`
+              $(".company_login_send_otp_loader").hide();
+              $(".company_resend_otp_btn").show();
+              $("#show-company-login-form-otp").show();
+            } else {
+              $("#company_login_error_msg").html(`
+                    <div id="form-message" style="color: red; margin-top: 10px; margin-bottom: 10px;">
+                        ${response.data}
+                    </div>
+                `);
+              $(".company_login_send_otp_loader").hide();
+              $(".company_login_btn").show();
+            }
+          },
+          error: function () {
+            // cfpShowErrorMessage();
+            $("#company_login_error_msg").html(`
                     <div id="form-message" style="color: red; margin-top: 10px;">
                        Oops! The server is currently unavailable. Please try again later. If the issue persists, please contact the administrator.
                     </div>
                 `);
-                $(".company_login_send_otp_loader").hide();
-                $(".company_login_btn").show();
-            },
+            $(".company_login_send_otp_loader").hide();
+            $(".company_login_btn").show();
+          },
         });
     }
 
@@ -42,14 +52,14 @@ jQuery(document).ready(async function ($) {
         let otp = params.get("verify-otp-company-login");
 
         if (!otp) {
-            jQuery("#show-company-login-form-otp").append(`
+            jQuery("#company_login_otp_error_msg").html(`
                         <div id="form-message" style="color: red; margin-top: 10px;">
                             Please enter the OTP.
                         </div>
                     `);
             return;
         } else if (otp.length != 6) {
-            jQuery("#show-company-login-form-otp").append(`
+            jQuery("#company_login_otp_error_msg").html(`
                         <div id="form-message" style="color: red; margin-top: 10px;">
                             Please enter a valid OTP.
                         </div>
@@ -73,13 +83,13 @@ jQuery(document).ready(async function ($) {
                         jQuery(
                             ".company_redirect_verify_otp_loader"
                         ).show();
-
+                        showLoadingScreen();
+                        $("#loading-screen").show();
                         window.location.href =
-                            response?.data?.redirect_url ||
-                            "https://pragmaappscstg.wpengine.com/investor-service-request/?tab=company_information";
+                          response?.data?.redirect_url;
                     } else {
                         // cfpShowErrorMessage();
-                        jQuery("#show-company-login-form-otp").append(`
+                        jQuery("#company_login_otp_error_msg").html(`
                         <div id="form-message" style="color: red; margin-top: 10px;">
                             ${response.data.message}
                         </div>
@@ -90,7 +100,7 @@ jQuery(document).ready(async function ($) {
                 },
                 error: function () {
                     // cfpShowErrorMessage();
-                    jQuery("#show-company-login-form-otp").append(`
+                    jQuery("#company_login_otp_error_msg").html(`
                         <div id="form-message" style="color:red; margin-top: 10px;">
                             Oops! The server is currently unavailable. Please try again in a little while.
                         </div>
@@ -120,7 +130,7 @@ jQuery(document).ready(async function ($) {
 
        grecaptcha.ready(function () {
          grecaptcha
-           .execute("6Lezg8wqAAAAAIze3YgWt7kkGfNhbklSHwRLpi0O", {
+           .execute(recaptchaKey, {
              action: "submit",
            })
            .then(function (token) {
@@ -131,12 +141,12 @@ jQuery(document).ready(async function ($) {
      });
     $("#cfp-company-login-form").on("submit", function (e) {
         e.preventDefault();
-       
         $("#form-message").remove();
         let formData = $(this).serialize();
         let params = new URLSearchParams(formData);
         let password = params.get("password");
         let username = params.get("username");
+        let company_login_name = params.get("company_login_name");
         let recaptcha = params.get("g-recaptcha-response");
         //  grecaptcha
         //    .execute("6Lezg8wqAAAAAIze3YgWt7kkGfNhbklSHwRLpi0O", {
@@ -147,14 +157,14 @@ jQuery(document).ready(async function ($) {
         //      // $("#cfp-company-login-form")[0].submit(); // Now submit the form
         //    });
 
-        if (!password || !username) {
-            $("#cfp-company-login-form").append(`
+        if (!password || !username || !company_login_name) {
+          $("#company_login_error_msg").html(`
                         <div id="form-message" style="color: red; margin-top: 10px;">
                             Please complete all the required fields before proceeding.
                         </div>
                     `);
-            // alert('Please fill in all required fields.');
-            return;
+          // alert('Please fill in all required fields.');
+          return;
         }
         $(".company_login_loader").show();
         $(".company_login_btn").hide();
@@ -168,6 +178,7 @@ jQuery(document).ready(async function ($) {
             action: "company_login", // Action name defined in PHP
             password: password,
             username: username,
+            company_login_name: company_login_name,
             "g-recaptcha-response": recaptcha,
             security: ajax_object.nonce,
           },
@@ -177,7 +188,7 @@ jQuery(document).ready(async function ($) {
               $(".company_login_send_otp_loader").show();
               sendOTPfn(response?.data?.email);
             } else {
-              $("#cfp-company-login-form").append(`
+               $("#company_login_error_msg").html(`
                         <div id="form-message" style="color: red; margin-top: 10px;">
                             ${response.data}
                         </div>
@@ -187,7 +198,7 @@ jQuery(document).ready(async function ($) {
             }
           },
           error: function () {
-            $("#cfp-company-login-form").append(`
+           $("#company_login_error_msg").html(`
                         <div id="form-message" style="color: red; margin-top: 10px;">
                             Oops! The server is currently unavailable. Please try again later. If the issue persists, please contact the administrator.
                         </div>

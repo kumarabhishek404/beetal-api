@@ -1,5 +1,15 @@
 <?php
 
+header("Access-Control-Allow-Origin: *"); // allow all origins (not secure for production)
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
+// Handle preflight OPTIONS request
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
 function csp_login_null_check($response)
 {
     if (isset($response['statusCode']) || isset($response['errorCode'])) return true;

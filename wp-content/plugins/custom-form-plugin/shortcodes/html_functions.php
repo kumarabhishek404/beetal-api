@@ -2,14 +2,14 @@
 
 function form_download_htm_code($name, $description, $link)
 {
-    $output_html = "<div class='list-group px-3'>";
+    $output_html = "<div class='list-group col-12 col-md-6 p-2'>";
     $output_html .= "<div class='card'>";
     $output_html .= "<div class='card-body'>";
-    $output_html .= "<h6 class='card-title d-flex justify-content-between m-0'>";
+    $output_html .= "<h6 class='card-title d-flex justify-content-between m-0 text-start'>";
     $output_html .= $name;
-    $output_html .= "<a href='" . $link . "' class='text-blue' target='_blank'><i class='fa-solid fa-download'></i></a>";
+    $output_html .= "<a href='" . $link . "' class='text-blue ms-1' target='_blank'><i class='fa-solid fa-download'></i></a>";
     $output_html .= "</h6>";
-    $output_html .= "<p class='card-text my-1'>";
+    $output_html .= "<p class='card-text my-1 text-start'>";
     $output_html .= "<small>";
     $output_html .= $description;
     $output_html .= "</small>";
@@ -27,6 +27,15 @@ function show_company_download_forms($company)
     }
     $output_html = '';
     $company_output_html = '';
+
+    $output_html = "
+     <div class='d-flex flex-column text-start border-bottom w-100 pb-2 mb-2'>
+                            <p class='m-0 h4 fw-bold'>Services and Resources</p>
+                        </div>
+                        <p class='p-0 mb-3 text-justify'>Access key documents and resources, including application
+                            forms, allotment queries, prospectuses, public announcements, FAQs, and other shareholder-related
+                            services to streamline your investment process.</p>
+    ";
 
     // error_log($company);
     // error_log($company . '=>' . print_r([
@@ -47,10 +56,10 @@ function show_company_download_forms($company)
         empty($pods->display('faq')) &&
         empty($pods->display('sh4'))
     ) {
-        $output_html .= '<div class="d-flex flex-column show-tab2-resources">';
-        $output_html .= "<p class='px-4 m-0 text-justify'>It looks like the downloadable form isn’t available right now. Need help? Reach out to our support team!</p>";
+        $output_html .= '<div class="d-flex show-tab2-resources">';
+        $output_html .= "<p class='m-0 text-justify'>It looks like the downloadable form isn’t available right now. Need help? Reach out to our support team!</p>";
     } else {
-        $output_html .= '<div class="d-flex flex-column gap-3 mt-3 show-tab2-resources">';
+        $output_html .= '<div class="d-flex flex-wrap my-2 show-tab2-resources">';
         if ($pods->total() > 0) {
             if (!empty($pods->display('physical_application_form'))) {
                 $output_html .= form_download_htm_code(
@@ -83,7 +92,8 @@ function show_company_download_forms($company)
             if (!empty($pods->display('corrigendum'))) {
                 $output_html .= form_download_htm_code(
                     "Corrigendum",
-                    "Downloading a corrigendum allows investors and other stakeholders to access the corrected information and ensure they have the most accurate and up-to-date data.",
+                    "Downloading a corrigendum provides investors with corrected, up-to-date information.",
+                    // "Downloading a corrigendum allows investors and other stakeholders to access the corrected information and ensure they have the most accurate and up-to-date data.",
                     $pods->display('corrigendum')
                 );
             }
@@ -106,14 +116,19 @@ function show_company_download_forms($company)
     $output_html .= "</div>";
 
     $image_url = $pods->field('company_logo')['guid'];
-    $company_output_html = "<div id='company-data' class='d-flex mb-3 flex-row p-2'>";
-    $company_output_html .=       "<div class='p-2 col-4 col-md-2 d-flex align-items-center'>";
-    $company_output_html .=              "<img src='$image_url ' alt='" . $pods->display('name') . "' style='height: 65px;' />";
+    $company_output_html = "<div id='company-data' class='d-flex flex-column flex-lg-row p-2'>";
+    $company_output_html .=       "<div class='pt-2 col-12 d-lg-none d-flex'>";
+    $company_output_html .=  "<h5 class='mb-2'>" . strtoupper($pods->display('name'));
+    $company_output_html .=             "</h5>";
     $company_output_html .=        "</div>";
-    $company_output_html .=        "<div class='d-flex flex-column flex-md-row justify-content-between py-2 px-3 col-8 col-md-10'>";
+    $company_output_html .=        "<div class='col-12 d-flex'>";
+    $company_output_html .=       "<div class='p-2 col-5 col-sm-4 col-lg-3 col-xl-2 d-flex align-items-center'>";
+    $company_output_html .=              "<img src='$image_url ' alt='" . $pods->display('name') . "' />";
+    $company_output_html .=        "</div>";
+    $company_output_html .=        "<div class='d-flex flex-column justify-content-center py-2 px-3 col-7 col-sm-8 col-lg-9 col-xl-10'>";
     $company_output_html .= "<div class='d-flex flex-wrap align-items-center col-12'>";
-    $company_output_html .=          "<div class='d-flex col-12 col-md-8 flex-column justify-content-between'>";
-    $company_output_html .=              "<h5 class='m-0 mb-3'>" . $pods->display('name');
+    $company_output_html .=          "<div class='d-flex col-12 flex-column justify-content-between'>";
+    $company_output_html .=              "<h5 class='mb-2 d-none d-lg-block'>" . strtoupper($pods->display('name'));
     $company_output_html .=             "</h5>";
     $company_output_html .=             "<span class='d-flex gap-2 h6 text-blue'> ";
     if ($pods->display('is_live')) {
@@ -125,8 +140,8 @@ function show_company_download_forms($company)
     $company_output_html .=       $pods->display('offer_type') . "</span>";
     $company_output_html .= " </div>";
 
-    $company_output_html .=       " <div class='d-flex col-12 col-md-4 h-100 flex-column justify-content-start align-items-start align-items-md-end justify-content-md-between'>";
-    $company_output_html .=             "<span class='d-flex gap-2 h6 mt-1 text-blue justify-content-end'>";
+    $company_output_html .=       " <div class='d-flex col-12 align-items-start align-items-xl-center flex-column flex-xl-row justify-content-between'>";
+    $company_output_html .=             "<span class='d-flex gap-2 h6 text-blue justify-content-end'>";
     $company_output_html .=                  "<i class='bi bi-calendar-check'></i>";
     $company_output_html .=                  "<span><strong>Open:</strong> " .  date('d M, Y', strtotime($pods->display('opening_date'))) . "</span>";
     $company_output_html .=              "</span>";
@@ -135,6 +150,7 @@ function show_company_download_forms($company)
     $company_output_html .=                 "<span><strong>Close:</strong> " .  date('d M, Y', strtotime($pods->display('closing_date'))) . "</span>";
     $company_output_html .=              "</span>";
     $company_output_html .=          "</div>";
+    $company_output_html .=      "</div>";
     $company_output_html .=      "</div>";
     $company_output_html .=      "</div>";
     $company_output_html .=   "</div>";
@@ -157,9 +173,10 @@ function ipo_allotment_form()
     );
     ob_start();
 ?>
-    <form id="ipo-allotment-form" class="ipo-allotment-form pb-5">
+    <script src="https://www.google.com/recaptcha/api.js?render=6Lezg8wqAAAAAIze3YgWt7kkGfNhbklSHwRLpi0O"></script>
+    <form id="ipo-allotment-form" class="ipo-allotment-form p-3">
         <!-- Company Name Dropdown -->
-        <div class="mb-3 mt-3 px-md-5 px-4">
+        <div class="form-margin">
             <label for="company_name" class="form-label required-label">Company Name</label>
             <select name="ipo-allotment-company_name" id="company_name" class="form-select" required>
                 <option value="">----Select----</option>
@@ -181,7 +198,7 @@ function ipo_allotment_form()
         </div>
 
         <!-- Radio Button Group -->
-        <div class="mb-1 px-md-5 px-4">
+        <div class="">
             <div class="d-flex flex-wrap">
                 <?php foreach ($allotment_atts['options'] as $option => $value): ?>
                     <div class="form-check me-3">
@@ -201,7 +218,7 @@ function ipo_allotment_form()
         </div>
 
         <!-- Dynamic Value Field -->
-        <div class="mb-4 px-md-5 px-4">
+        <div class="mb-4 form-margin">
             <input type="text"
                 name="ipo-allotment-dynamic-field"
                 id="ipo-allotment-dynamic-field"
@@ -210,13 +227,15 @@ function ipo_allotment_form()
         </div>
 
         <!-- Submit Button -->
-        <div class="text-center px-md-5 px-4">
-            <button type="submit" class="btn btn-blue ipo_submit_btn">Submit</button>
-            <button class="btn btn-blue fetch_ipo_submit_loader text-white" type="button" disabled style="display:none;">
+        <div class="text-start form-margin">
+            <button type="submit" class="btn btn-blue ipo_submit_btn" style="width: 160px;">Submit</button>
+            <button class="btn btn-blue fetch_ipo_submit_loader text-white" type="button" disabled style="display:none; width: 165px;">
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                 Fetching Details...
             </button>
         </div>
+
+        <div id="allotment_result"></div>
     </form>
 <?php
     return ob_get_clean();
@@ -292,9 +311,11 @@ function kyc_complience_html()
 {
     ob_start();
 ?>
-    <div class="px-md-5 px-4">
-        <p class="h4 mb-2">FOR ATTENTION OF SHAREHOLDERS HOLDING SHARES IN PHYSICAL FORM</p>
-        <p>The SEBI vide its Circular No. SEBI/HO/MIRSD/MIRSD RTAMB/P/CIR/2021/655 dated November 3, 2021 read together with SEBI Circular No. SEBI/HO/MIRSD/MIRSD RTAMB/P/CIR/2021/687 dated December 14, 2021 (the "SEBI Circulars") has mandated for furnishing/ updating PAN, KYC details (Address, Mobile No., E-mail ID, Bank Details) and Nomination details by all the holders of physical securities in listed company.</p>
+    <div class="px-3">
+        <p class="h4 mb-4">
+            For the Attention of Shareholders Holding Shares in Physical Form
+        </p>
+        <p class="mb-4">The SEBI vide its Circular No. SEBI/HO/MIRSD/MIRSD RTAMB/P/CIR/2021/655 dated November 3, 2021 read together with SEBI Circular No. SEBI/HO/MIRSD/MIRSD RTAMB/P/CIR/2021/687 dated December 14, 2021 (the "SEBI Circulars") has mandated for furnishing/ updating PAN, KYC details (Address, Mobile No., E-mail ID, Bank Details) and Nomination details by all the holders of physical securities in listed company.</p>
         <p>Further In case of non-updation of PAN or Choice of Nomination or Contact Details or Mobile Number or Bank Account Details or Specimen Signature in respect of physical folios, dividend/interest etc. shall be paid only through electronic mode with effect from April 01, 2024 upon furnishing all the aforesaid details in entirety.</p>
         <?= registration_details_table_shortcode(); ?>
         <p>Shareholders holding shares in physical form are requested to submit the duly filled in documents along with the related proofs as mentioned above to the Company at its Registered Office or Registrar and Transfer Agent at the below mentioned address at the earliest:</p>
@@ -303,18 +324,18 @@ function kyc_complience_html()
             <div class="card-body p-0 m-0">
                 <div class="bg-blue text-white rounded-t px-4 py-3 h5">REGD. OFFICE</div>
                 <div class="d-flex flex-column px-4 py-2 pb-4">
-                    <div class="d-flex h6 gap-3">
+                    <div class="d-flex h6">
                         <i class="bi bi-geo-alt fs-4 text-blue"></i>
-                        Beetal House, 3rd Floor, 99 Madangir, Behind Local Shopping Centre, Near Dada Harsukh Dass Mandir, New Delhi – 110062
+                        <p class="m-0 ms-1">Beetal House, 3rd Floor, 99 Madangir, Behind Local Shopping Centre, Near Dada Harsukh Dass Mandir, New Delhi – 110062</p>
                     </div>
-                    <div class="d-flex gap-3 flex-wrap">
-                        <div class="d-flex gap-2 flex-nowrap fs-6">
+                    <div class="d-flex ps-1 flex-wrap">
+                        <div class="d-flex gap-2 flex-nowrap fs-6 pe-4">
                             <i class="bi bi-telephone text-blue"></i> 011-29961281
                         </div>
-                        <div class="d-flex gap-2 flex-nowrap fs-6">
+                        <div class="d-flex gap-2 flex-nowrap fs-6 pe-4">
                             <i class="bi bi-printer text-blue"></i> 011-29961284
                         </div>
-                        <div class="d-flex gap-2 flex-nowrap fs-6">
+                        <div class="d-flex gap-2 flex-nowrap fs-6 pe-4">
                             <i class="bi bi-envelope text-blue"></i> beetalrta@gmail.com
                         </div>
                         <div class="d-flex gap-2 flex-nowrap fs-6">
@@ -334,7 +355,7 @@ function registration_details_table_shortcode()
     ob_start(); // Buffer the output
 
 ?>
-    <table class="registration-details-table mt-4">
+    <table class="registration-details-table my-4">
         <thead>
             <tr>
                 <th>No.</th>
@@ -400,6 +421,205 @@ function registration_details_table_shortcode()
     return ob_get_clean();
 }
 
+function form2_html_fn()
+{
+    $company_data = [];
+    $atts = array(
+        'label' => 'Select an Option:',
+        'options' => array(
+            'Application Number' => 'Enter Application Number.',
+            // 'PAN' => 'Enter PAN Number.',
+            'DP/Client ID/Folio No.' => 'Eg:-INXXXXXXXXXX,120XXXXXXXXX,XXXXXXX',
+        )
+    );
+    $company_selected = !empty($_GET['company']) ? $_GET['company'] : '';
+    $pods = pods('ipo_company')->find([
+        'where' => 'company_status IN ("active")',
+        'limit' => -1
+    ]);
+    if (!empty($company_selected)) {
+        $company_data = pods('ipo_company')->find([
+            'where' => 'company_status IN ("active") and company_code = "' . $company_selected . '"',
+            'limit' => -1
+        ]);
+    }
+    // error_log(print_r($company_selected, true));
+    ob_start();
+?>
+    <script src="https://www.google.com/recaptcha/api.js?render=6Lezg8wqAAAAAIze3YgWt7kkGfNhbklSHwRLpi0O"></script>
+    <form id="form2-fetch" class="my-5 px-3">
+
+        <!-- Company Selection -->
+        <div id="company-select-div" class="form-margin <?= empty($company_selected) ? '' : 'hidden' ?>">
+            <label for="company" class="form-label">Please Select Company:</label>
+            <select name="offer_company" id="tab2_company_select_tab" class="form-select">
+                <option value="">----Select----</option>
+                <?php
+                if ($pods->total() > 0):
+                    while ($pods->fetch()):
+                        $company_name = $pods->field('name');
+                        $company_code = $pods->field('company_code');
+                        $selected = $company_selected == $company_code ? 'selected' : '';
+                        echo "<option value='$company_code' $selected >$company_name</option>";
+                    endwhile;
+                endif;
+                ?>
+                <?php
+                ?>
+            </select>
+        </div>
+
+        <!-- <div class="radio-button-group">
+            <div class="radio-button-items">
+                <div class="radio-button-item">
+                    <div class="me-3 d-flex align-items-center gap-2">
+                        <input class="form-check-input" type="radio" name="form2_radio_option_otp" id="login_email" value="email" checked />
+                        <label class="m-0" for="login_email">Email</label>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <input class="form-check-input" type="radio" name="form2_radio_option_otp" id="login_phone" value="number" />
+                        <label class="m-0" for="login_phone">Phone</label>
+                    </div>
+                </div>
+            </div>
+            <input type="email" name="dynamic-field-form2-otp" id="dynamic-field-form2-email-otp" placeholder="Enter here..." />
+            <input class="hidden" type="number" maxlength="10" name="dynamic-field-form2-phone-otp" id="dynamic-field-form2-phone-otp" placeholder="Enter here..." />
+        </div> -->
+
+        <!-- <div id="verify_form2_div" class="form-group hidden">
+            <label for="otp_verify" class="required-label">Enter Verify OTP</label>
+            <input type="number" id="form2_otp_verify" name="otp_verify" placeholder="xxxxxx">
+        </div> -->
+
+        <div class="form-margin">
+            <!-- Radio Button Group -->
+            <div class="mb-1">
+                <div id="radio-group" class="d-flex flex-row flex-wrap">
+                    <?php
+                    foreach ($atts['options'] as $option => $value) {
+                        echo '<div class="form-check form-check-inline me-3">';
+                        if ($option == 'Application Number') {
+                            echo '<input class="form-check-input" type="radio" name="form2_radio_option" id="' . sanitize_title($option) . '" value="' . $value . '" checked>';
+                        } else {
+                            echo '<input class="form-check-input" type="radio" name="form2_radio_option" id="' . sanitize_title($option) . '" value="' . $value . '">';
+                        }
+                        echo '<label class="form-check-label" for="' . sanitize_title($option) . '">' . $option . '</label>';
+                        echo '</div>';
+                    }
+                    ?>
+                </div>
+            </div>
+
+            <!-- Dynamic Field -->
+            <div class="">
+                <input type="text" name="form2-dynamic-value-field" id="form2-dynamic-field" class="form-control" placeholder="Enter Application Number." required>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="text-start">
+            <button type="submit" class="btn btn-blue ipo_submit_btn" style="width: 160px;">Submit</button>
+            <button class="btn btn-blue fetch_ipo_submit_loader text-white" type="button" disabled style="display:none; width: 165px;">
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                Fetching Details...
+            </button>
+        </div>
+        <div id="error-form2-result"></div>
+    </form>
+    <div id="form2-result"></div>
+<?php
+    return ob_get_clean();
+}
+
+function show_menu_form_tab_fn()
+{
+    $menuList = array(
+        array(
+            'title' => 'Download Form',
+            'sub_title' => 'Access and download important financial documents, reports, and statements in PDF format for your records and analysis.',
+            'icon' => 'bi bi-arrow-right-circle-fill',
+            'link' => site_url('contact/#downloads')
+        ),
+        array(
+            'title' => 'Frequently Asked Questions',
+            'sub_title' => 'Find answers to common queries about our services, policies, investor related queries, and support.',
+            'icon' => 'bi bi-arrow-right-circle-fill',
+            'link' => site_url('contact/#faqs')
+        ),
+        array(
+            'title' => 'Escalation Matrix',
+            'sub_title' => 'A structured framework ensuring timely resolution of grievances by escalating issues through predefined levels.',
+            'icon' => 'bi bi-arrow-right-circle-fill',
+            'link' => site_url('contact/#grievance_matrix')
+        )
+    );
+    ob_start();
+?>
+    <div class="d-flex flex-column">
+        <?php foreach ($menuList as $item): ?>
+            <a href="<?= $item['link'] ?>"
+                style="cursor: pointer;"
+                class="d-flex align-items-center justify-content-between gap-3 text-decoration-none  p-4 border-bottom border-secondary">
+                <p class="text-white m-0 fs-5"><?= $item['title'] ?></p>
+                <i class="<?= $item['icon'] ?> text-white fs-4" aria-hidden="true"></i>
+
+            </a>
+        <?php endforeach; ?>
+    </div>
+<?php
+    return ob_get_clean();
+}
+
+function show_menu($menuList, $logout = false)
+{
+    ob_start(); ?>
+    <div class="d-flex w-100 justify-content-between align-items-center border-bottom" style="padding: 1.5rem 20px;">
+        <a href="<?= $_SERVER['HTTP_REFERER'] ?? site_url('investor-services#service-list') ?>" class="d-flex align-items-center h4 ps-2 text-white justify-content-center m-0 text-decoration-none"><i class="bi bi-arrow-left-circle me-4"></i>Back</a>
+        <i id="menuToggleIcon" class="bi bi-chevron-down text-white fs-3 d-md-none" data-bs-toggle="collapse" data-bs-target="#menuCollapse" aria-expanded="false" aria-controls="menuCollapse"></i>
+    </div>
+
+    <!-- Collapsible content -->
+    <div class="collapse d-md-block w-100" id="menuCollapse">
+        <div class="text-black p-0 m-0">
+            <ul class="nav flex-column m-0">
+                <?php foreach ($menuList as $item): ?>
+                    <!-- <a href="<?= site_url('/investor-request#' . $item['hash'] . '') ?>" class="text-decoration-none"> -->
+                    <li id="<?php echo $item['form'] . $item['tab'] ?>"
+                        class="d-flex align-items-center justify-content-between border-bottom py-3 ps-3 menu-items <?php echo $item['form'] == 'form1' ? 'menu-active' : 'text-white' ?>"
+                        style="cursor: pointer;"
+                        onclick="changeTab('<?= site_url($item['hash']) ?>'">
+                        <span class="d-flex align-items-center justify-space-between gap-2" style="font-weight: 500;">
+                            <!-- <img src="<?php echo $item['image_url'] ?>" class="me-2 border-y-1" style="width:40px; height:40px; border-radius: 100%; min-width:40px;" /> -->
+                            <span class="text-white rounded-circle d-flex justify-content-center align-items-center" style="min-height: 50px; min-width: 50px; width: 50px; height: 50px;">
+                                <i class="bi bi-<?= $item['icon'] ?> fs-2"></i>
+                            </span>
+                            <p class="m-0 h6"><?php echo esc_html($item['title']); ?></p>
+                        </span>
+                    </li>
+                    <!-- </a> -->
+                <?php endforeach; ?>
+                <?php if (is_user_logged_in() && $logout) : ?>
+                    <li
+                        class="d-flex align-items-end justify-content-between border-bottom py-3 ps-3 menu-items text-white"
+                        style="cursor: pointer;"
+                        onclick="logoutUser()">
+                        <span class="d-flex align-items-center justify-space-between gap-2" style="font-weight: 500;">
+                            <span class="text-white rounded-circle d-flex justify-content-center align-items-center" style="min-height: 50px; min-width: 50px; width: 50px; height: 50px;">
+                                <i class="bi bi-power ?> fs-2"></i>
+                            </span>
+                            Logout
+                        </span>
+                    </li>
+                <?php endif; ?>
+            </ul>
+            <?= show_menu_form_tab_fn() ?>
+        </div>
+    </div>
+
+<?php
+    return ob_get_clean();
+}
+
 function show_recent_company_list_fn()
 {
     $pods = pods('ipo_company')->find([
@@ -418,7 +638,7 @@ function show_recent_company_list_fn()
         <?php while ($pods->fetch()) : ?>
             <?php error_log($pods->field('is_live')); ?>
             <?php $redirect_url = $pods->field('offer_type') != 'IPO - SME' ?
-                site_url("investor-request/?company=" . $pods->field('company_code') . "#Open_Buyback_right_issue") : site_url('investor-request/#IPO_Allotment_Status');
+                site_url("investor-services?company=" . $pods->field('company_code')) . "#Open_Buyback_right_issue" : site_url('investor-services/?company=' . $pods->field('company_code') . 'IPO_Allotment_Status');
             $card_text = $pods->field('offer_type');
             switch ($pods->field('offer_type')) {
                 case 'Public Issue - SME':
@@ -433,7 +653,7 @@ function show_recent_company_list_fn()
             <div class="col-12 col-md-4 mb-4 mb-md-0 px-2 d-flex flex-wrap">
                 <a class="d-flex flex-column justify-content-between align-items-start border-blue-2 rounded text-decoration-none w-100 bg-white"
                     href="<?= $redirect_url ?>">
-                    <h5 class="m-0 mt-3 w-100 px-3 text-start"><?= $pods->field('name') ?></h5>
+                    <h5 class="m-0 mt-3 w-100 px-3 text-start"><?= strtoupper($pods->field('name')); ?></h5>
                     <div class="d-flex py-2 px-3 align-items-center w-100">
                         <div class="col-8 d-flex align-items-center pe-3">
                             <?php $image_url = $pods->field('company_logo')['guid']; ?>
@@ -463,107 +683,32 @@ function show_recent_company_list_fn()
     return ob_get_clean();
 }
 
-function form2_html_fn()
+function show_active_company_list()
 {
-    $company_data = [];
-    $atts = array(
-        'label' => 'Select an Option:',
-        'options' => array(
-            'Application Number' => 'Enter Application Number.',
-            'PAN' => 'Enter PAN Number.',
-            'DPID/Client Id' => 'Eg:-INXXXXXXXXXX,120XXXXXXXXX,XXXXXXX',
-        )
-    );
-    $company_selected = !empty($_GET['company']) ? $_GET['company'] : '';
-    $pods = pods('ipo_company')->find([
-        'where' => 'company_status IN ("active")',
-        'limit' => -1
+    // Fetch Pods data
+    $initial_pods = pods('ipo_company', [
+        'where' => 'company_status = "Active"',
+        'limit' => 5
     ]);
-    if (!empty($company_selected)) {
-        $company_data = pods('ipo_company')->find([
-            'where' => 'company_status IN ("active") and company_code = "' . $company_selected . '"',
-            'limit' => -1
-        ]);
-    }
-    // error_log(print_r($company_selected, true));
     ob_start();
 ?>
-    <form id="form2-fetch" class="px-md-5 px-4 pb-5">
-        <!-- Company Selection -->
-        <div id="company-select-div" class="mb-3 <?= empty($company_selected) ? '' : 'hidden' ?>">
-            <label for="company" class="form-label">Please Select Company:</label>
-            <select name="offer_company" id="tab2_company_select_tab" class="form-select">
-                <option value="">----Select----</option>
-                <?php
-                if ($pods->total() > 0):
-                    while ($pods->fetch()):
-                        $company_name = $pods->field('name');
-                        $company_code = $pods->field('company_code');
-                        $selected = $company_selected == $company_code ? 'selected' : '';
-                        echo "<option value='$company_code' $selected >$company_name</option>";
-                    endwhile;
-                endif;
-                ?>
-                <?php
-                ?>
-            </select>
+    <div class="d-flex flex-wrap pb-4">
+        <div class="d-flex flex-column text-start w-100 py-4 px-3 change-company-css">
+            <p class="m-0 h4 fw-semibold">Recent Issues</p>
         </div>
-
-        <div class="radio-button-group">
-            <div class="radio-button-items">
-                <div class="radio-button-item">
-                    <div class="me-3 d-flex align-items-center gap-2">
-                        <input class="form-check-input" type="radio" name="form2_radio_option_otp" id="login_email" value="email" checked />
-                        <label class="m-0" for="login_email">Email</label>
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                        <input class="form-check-input" type="radio" name="form2_radio_option_otp" id="login_phone" value="number" />
-                        <label class="m-0" for="login_phone">Phone</label>
-                    </div>
-                </div>
+        <?php
+        $sno = 1;
+        while ($initial_pods->fetch()) : ?>
+            <div class="d-flex align-items-center col-12 cursor-pointer py-3 px-3 text-decoration-none text-black border-muted fs-5 change-company-div change-company-css mycustomClassRight <?= $sno == 1 ? 'first-child' : '' ?>" data-company="<?= $initial_pods->field('company_code') ?>">
+                <!-- <div class="d-flex align-items-center justify-content-center bg-white p-1 rounded-circle me-2 circle-50-css">
+                    <img src="<?= $initial_pods->field('company_logo')['guid']; ?>" alt="<?= $initial_pods->field('name'); ?>" style="object-fit: contain;" />
+                </div> -->
+                <?= strtoupper($initial_pods->field('name')); ?>
             </div>
-            <input type="email" name="dynamic-field-form2-otp" id="dynamic-field-form2-email-otp" placeholder="Enter here..." />
-            <input class="hidden" type="number" maxlength="10" name="dynamic-field-form2-phone-otp" id="dynamic-field-form2-phone-otp" placeholder="Enter here..." />
-        </div>
-
-        <div id="verify_form2_div" class="form-group hidden">
-            <label for="otp_verify" class="required-label">Enter Verify OTP</label>
-            <input type="number" id="form2_otp_verify" name="otp_verify" placeholder="xxxxxx">
-        </div>
-
-        <!-- Radio Button Group -->
-        <div class="mb-1">
-            <div id="radio-group" class="d-flex flex-row">
-                <?php
-                foreach ($atts['options'] as $option => $value) {
-                    echo '<div class="form-check form-check-inline me-3">';
-                    if ($option == 'Application Number') {
-                        echo '<input class="form-check-input" type="radio" name="form2_radio_option" id="' . sanitize_title($option) . '" value="' . $value . '" checked>';
-                    } else {
-                        echo '<input class="form-check-input" type="radio" name="form2_radio_option" id="' . sanitize_title($option) . '" value="' . $value . '">';
-                    }
-                    echo '<label class="form-check-label" for="' . sanitize_title($option) . '">' . $option . '</label>';
-                    echo '</div>';
-                }
-                ?>
-            </div>
-        </div>
-
-        <!-- Dynamic Field -->
-        <div class="mb-4">
-            <input type="text" name="form2-dynamic-value-field" id="form2-dynamic-field" class="form-control" placeholder="Enter Application Number." required>
-        </div>
-
-        <!-- Submit Button -->
-        <div class="text-center">
-            <button type="submit" class="btn btn-blue ipo_submit_btn">Submit</button>
-            <button class="btn btn-blue fetch_ipo_submit_loader text-white" type="button" disabled style="display:none;">
-                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                Fetching Details...
-            </button>
-        </div>
-    </form>
-    <div id="form2-result" class="px-md-5 px-4 pb-5"></div>
+        <?php
+            $sno++;
+        endwhile; ?>
+    </div>
 <?php
     return ob_get_clean();
 }

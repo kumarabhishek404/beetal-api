@@ -10,11 +10,11 @@
 }
 
 .text-blue {
-  color: #212d45 !important;
+  color: #06102A !important;
 }
 div .bg-blue {
-  background-color: #212d45 !important;
-  border-color: #212d45 !important;
+  background-color: #06102A !important;
+  border-color: #06102A !important;
 }
 div .bg-blue-light {
   background-color: #007bff !important;
@@ -76,16 +76,16 @@ div .bg-blue-light {
 
 .menu-active {
   background-color: #ffffff !important;
-  color: black !important;
+  /* color: black !important; */
   border-color: #fff !important;
 }
 
 .menu-active i {
-  color: #212d45 !important;
+  /* color: #06102A !important; */
 }
 
 input[type="radio"]:checked {
-  background-color: #212d45 !important;
+  background-color: #06102A !important;
 }
 
 .ipo-handle-form .column label {
@@ -106,10 +106,10 @@ input[type="radio"]:checked {
 }
 
 .tax-forms-table th {
-  background-color: #212d45;
+  background-color: #06102A;
   font-weight: bold;
   color: white !important;
-  /* border-color: #212d45 !important; */
+  /* border-color: #06102A !important; */
 }
 
 .tax-forms-table tr:nth-child(even) {
@@ -245,7 +245,7 @@ input[type="file"] {
 }
 
 .tags-container .tag:nth-child(odd) {
-  background-color: #212d45;
+  background-color: #06102A;
   /* Alternate background color for odd tags */
   color: white !important;
 }
@@ -319,7 +319,7 @@ input {
 button {
   width: 100%;
   padding: 10px;
-  background-color: #212d45;
+  background-color: #06102A;
   color: black;
   border: none;
   border-radius: 4px;
@@ -329,7 +329,7 @@ button {
 }
 
 button:hover {
-  background-color: #212d45;
+  background-color: #06102A;
   color: white;
 }
 
@@ -399,23 +399,27 @@ input:focus {
   border: 1px solid #218838;
   border-radius: 5px;
   z-index: 99;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 div .bg-blue {
-background: #212d45 !important;
+background: #06102A !important;
   color: white !important;
-  border-color: #212d45 !important;
+  border-color: #06102A !important;
 }
 
 .btn-blue{
-  background: #212d45 !important;
+  background: #06102A !important;
   color: white !important;
-  border-color: #212d45 !important;
+  border-color: #06102A !important;
   padding: 10px !important;
 }
 
 @media (max-width: 768px) {
+
+  .tax-forms-table td {
+  padding: 12px 5px !important;
+}
 
   .border-bottom-mobile{
     border-bottom: 1px solid #dee2e6;
@@ -426,6 +430,11 @@ background: #212d45 !important;
   }
 
   #right-section {
+    width: 100%;
+    justify-content: center;
+  }
+
+  #right-section-div {
     width: 100%;
     justify-content: center;
   }
@@ -451,7 +460,7 @@ background: #212d45 !important;
 }
 
 .disabled-button {
-    background-color: #212d45c4; /* Light gray or any desired color */
+    background-color: #06102Ac4; /* Light gray or any desired color */
     pointer-events: none; /* Disable mouse events */
     opacity: 0.6; /* Make button slightly transparent */
 }
@@ -470,11 +479,32 @@ background: #212d45 !important;
   background-color: #f8f9fa !important;
 }
 
+.bg-eee {
+  background-color: #eee !important;
+}
+
 .height-recent-circle{
   min-height: 80px; 
   min-width: 80px; 
   height: 80px; 
   width: 80px;
+}
+
+#left-section {
+  max-width: 25%; 
+  min-width: 25%;
+}
+#right-section {
+  max-width: 25%; 
+  min-width: 25%;
+}
+#right-section-div {
+  max-width: 30%; 
+  min-width: 30%;
+}
+
+.width_webkit {
+  width: -webkit-fill-available !important;
 }
 
 @media (min-width: 768px) and (max-width: 1024px) {
@@ -486,9 +516,43 @@ background: #212d45 !important;
 }
 }
 
-@media (max-width: 768px) {
+/* @media (max-width: 1000px) {
+  #right-section-div{
+    width: 100% !important;
+    max-width: 100% !important;
+    height: fit-content !important;
+  }
+} */
+
+@media (max-width: 960px) {
+  .pt-80 {
+    padding-top: 20px !important;
+  }
+  .pb-80 {
+    padding-bottom: 10px !important;
+  }
+}
+
+@media (max-width: 1200px) {
+  div .investor-section{
+    width: 100% !important;
+    max-width: 100% !important;
+    height: fit-content !important;
+  }
+  
+}
+
+@media (max-width: 767px) {
   .select2-container {
     width: 100% !important;
+  }
+
+  .height-adjust-md{
+          height: fit-content !important;
+        }
+
+  .menu-items {
+    padding-left: 0px !important;
   }
 
   .select2-selection__rendered {
@@ -498,6 +562,31 @@ background: #212d45 !important;
   .select2-selection {
     height: 40px !important;
   }
+
+  #right-section-div{
+    width: 100% !important;
+    max-width: 100% !important;
+    height: fit-content !important;
+  }
+
+  #left-section{
+    width: 100% !important;
+    max-width: 100% !important;
+    height: fit-content !important;
+  }
+  #right-section{
+    width: 100% !important;
+    max-width: 100% !important;
+    height: fit-content !important;
+  }
+
+  div .pt-80{
+    padding-top: 10px !important;
+  }
+  div .pb-80{
+    padding-bottom: 10px !important;
+  }
+
 }
 
 @media (max-width: 480px) {
@@ -522,7 +611,7 @@ background: #212d45 !important;
 }
 
 .registration-details-table th {
-    background-color: #212d45;
+    background-color: #06102A;
     color: white;
 }
 
@@ -536,16 +625,26 @@ background: #212d45 !important;
     width: 100%;
 }
 
+.sticky-header #ast-hf-menu-1 a,
+.sticky-header svg,
+.sticky-header #dropdownMenuButton,
+.sticky-header #dropdownMenuButton p {
+  transition: none;
+  color: black !important
+}
+
 /* Initial state - header is hidden above */
 .sticky-header {
-    position: fixed;
-    top: -100px; /* Start hidden above the viewport */
-    width: 100%;
-    z-index: 999;
-    background: #212d45;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    border-bottom:2px solid white;
-    animation: none; /* Initially, no animation */
+  position: fixed;
+  top: -20px;
+  width: 100%;
+  z-index: 999;
+  color: black;
+  background: rgba(242, 245, 247, 0.8);
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  animation: none;
+  /* transition: background-color 1s ease-in-out; */
+  backdrop-filter: blur(5px);
 }
 
 /* Animation for slide-down effect */
@@ -561,9 +660,7 @@ background: #212d45 !important;
 }
 
 /* Sticky state - header appears at top with animation */
-.sticky-header.visible {
-    animation: slideDown 1s ease-in-out forwards; /* Slide down animation */
-}
+/*  */
 
 .ast-header-html-2{
     display:none;
@@ -587,7 +684,7 @@ background: #212d45 !important;
 
 .loader {
   border: 6px solid #f3f3f3; /* Light grey */
-  border-top: 6px solid #212d45; /* Blue */
+  border-top: 6px solid #06102A; /* Blue */
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -597,4 +694,161 @@ background: #212d45 !important;
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+.pagination-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5px;
+  padding: 10px;
+}
+
+.pagination-btn {
+  min-width: 40px; /* Adjust for smaller screens */
+  max-width: 50px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.pagination-ellipsis {
+  padding: 8px;
+  font-size: 16px;
+  color: #666;
+}
+
+.change-company-div {
+  line-height: normal;
+}
+
+.circle-50-css{
+  min-width: 50px;
+  min-height: 50px;
+  max-width: 50px;
+  max-height: 50px;
+  overflow: hidden;
+}
+
+.scrollable-height {
+  max-height: 581px !important;
+  overflow-y: auto;
+}
+
+.badge-floating {
+      position: relative;
+      top: -1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      padding: 0.4rem 1rem;
+      /* border-radius: 8px; */
+      font-size: xx-large;
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      text-align: center;
+    }
+
+  .change-company-div:hover {
+    background-color: #007bff !important;
+    color: white !important;
+  }
+
+  .pt-80{
+    padding-top: 80px;
+  }
+  .pb-80{
+    padding-bottom: 80px;
+  }
+
+.bg-theme-blue {
+  background-color: #007bff !important;
+}
+.text-theme-blue {
+  color: #007bff !important;
+}
+.border-theme-blue {
+  border: 2px solid #007bff !important;
+}
+
+.menu-items {
+    padding-left: 61px !important;
+}
+
+/* Hide number input arrows for all major browsers */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.mycustomClass {
+  position: relative;
+  z-index: 0 !important;
+  /* background-color: red; */
+}
+
+.mycustomClass::before {
+  content: "";
+  height: 100%;
+  width: 1000%;
+  /* background-color: red; */
+  border-bottom: 1px solid #ddd;
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  z-index: -1 !important;
+}
+
+.mycustomClass:hover::before {
+  background-color: #ddd;
+  border-color: #ddd;
+}
+
+.mycustomClassRight {
+  position: relative;
+  z-index: 0 !important;
+  cursor: pointer;
+  color: white;
+}
+
+.first-child::before {
+  border-top: 1px solid #ddd;
+  width: 1000%;
+}
+
+.mycustomClassRight:nth-child(1) {
+  cursor: default;
+}
+
+.mycustomClassRight::before {
+  content: "";
+  height: 100%;
+  width: 1000%;
+  border-bottom: 1px solid #ddd;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: -1 !important;
+}
+
+/* .mycustomClassRight:hover::before {
+  background-color: #007bff;
+  border-color: #007bff;
+
+} */
+
+.mycustomClassRight:not(:first-of-type):hover::before {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.mycustomClassRight:not(:first-of-type):hover .myCustomPclass {
+  color: white !important;
 }

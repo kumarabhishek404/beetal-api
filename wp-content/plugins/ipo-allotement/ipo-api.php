@@ -15,39 +15,49 @@ function add_ipo_allotment($request) {
     global $wpdb;
     $params = $request->get_json_params();
 
+    // Required fields
+    $company = sanitize_text_field($params['company'] ?? '');
+
+    // Optional but at least one should be present
+    $application_number = sanitize_text_field($params['application_number'] ?? '');
+    $client_id = sanitize_text_field($params['client_id'] ?? '');
+    $pan_number = sanitize_text_field($params['pan_number'] ?? '');
+
+    // Other optional fields
     $name = sanitize_text_field($params['name'] ?? '');
     $permalink = sanitize_text_field($params['permalink'] ?? '');
-    $application_number = sanitize_text_field($params['application_number'] ?? '');
-    $pan_number = sanitize_text_field($params['pan_number'] ?? '');
-    $client_id = sanitize_text_field($params['client_id'] ?? '');
     $amount_reference = sanitize_text_field($params['amount_reference'] ?? '');
-    $company = sanitize_text_field($params['company'] ?? '');
     $alloted_shares = sanitize_text_field($params['alloted_shares'] ?? '');
     $applied_shares = sanitize_text_field($params['applied_shares'] ?? '');
     $remarks = sanitize_text_field($params['remarks'] ?? '');
-    $application_amount = sanitize_text_field($params['application_amount'] ?? '');
     $order_number = sanitize_text_field($params['order_number'] ?? '');
     $created_at = current_time('mysql');
     $modified_at = current_time('mysql');
 
-    if (empty($name) || empty($application_number) || empty($company)) {
-        return new WP_Error('missing_fields', 'Name, application number, and company are required', ['status' => 400]);
+    // Validation: Company is required
+    if (empty($company)) {
+        return new WP_Error('missing_fields', 'Company is required', ['status' => 400]);
     }
 
+    // Validation: At least one of the three fields must be present
+    if (empty($application_number) && empty($client_id) && empty($pan_number)) {
+        return new WP_Error('missing_fields', 'At least one of application_number, client_id, or pan_number is required', ['status' => 400]);
+    }
+
+    // Insert data into database
     $inserted = $wpdb->insert(
         'wp_pods_ipo_allotment_data',
         [
+            'company' => $company,
+            'application_number' => $application_number,
+            'client_id' => $client_id,
+            'pan_number' => $pan_number,
             'name' => $name,
             'permalink' => $permalink,
-            'application_number' => $application_number,
-            'pan_number' => $pan_number,
-            'client_id' => $client_id,
             'amount_reference' => $amount_reference,
-            'company' => $company,
             'alloted_shares' => $alloted_shares,
             'applied_shares' => $applied_shares,
             'remarks' => $remarks,
-            'application_amount' => $application_amount,
             'order_number' => $order_number,
             'created' => $created_at,
             'modified' => $modified_at

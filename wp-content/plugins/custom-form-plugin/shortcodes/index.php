@@ -4,47 +4,116 @@
 //     error_log('New Session ID => ' . session_id());
 // }
 
+function handle_fetch_download_pods_pagination_fn()
+{
+    $per_page = 10;
+
+    // Get the current page number from the query parameter
+    $current_page = isset($_POST['download']) ? intval($_POST['download']) : 1;
+    $filter = isset($_POST['filter']) ? $_POST['filter'] : 'Downloads';
+
+    // Calculate offset for pagination
+    $offset = ($current_page - 1) * $per_page;
+    // Define Pods query parameters
+    $args = array(
+        'where' => 'form_type = "' . $filter . '"',
+        'limit' => $per_page,
+        'offset' => $offset,
+    );
+
+    // Fetch Pods data
+    $initial_pods = pods('form_download', [
+        'where' => 'form_type = "' . $filter . '"',
+        'limit' => -1
+    ]);
+    $pods = pods('form_download', $args);
+
+    // Get total number of Pods
+    $total_pods = $initial_pods->total();
+
+    // Calculate total pages
+    $total_pages = ceil($total_pods / $per_page);
+    // error_log("Total pages: " . $total_pages . " Pods: " . $total_pods . " current Page: " . $current_page);
+    $response_data = [];
+    while ($pods->fetch()) {
+        array_push($response_data, [
+            'name' => $pods->field('name'),
+            'form_description' => $pods->field('form_description'),
+            'form_title' => $pods->field('form_title'),
+            'form_type' => $pods->field('form_type'),
+            'form_url' => $pods->field('form_url')['guid'],
+        ]);
+    }
+    // error_log(print_r(reset($response_data),true));
+
+    wp_send_json_success(["table_data" => $response_data, "total_pages" => $total_pages, "current_page" => $current_page]);
+}
+
 function show_recent_issue()
 {
-    $list = array(
-        array(
-            'image_url' => 'https://pragmaappscstg.wpengine.com/wp-content/uploads/2024/11/pixelcut-export-2.png',
-            'name' => 'Mayur Uniquoters Limited',
-            'issue' => 'Buy-Back Offer'
-        ),
-        array(
-            'image_url' => 'https://pragmaappscstg.wpengine.com/wp-content/uploads/2024/11/pixelcut-export.png',
-            'name' => 'Faalcon Concepts Limited',
-            'issue' => 'SME-IPO'
-        ),
-        array(
-            'image_url' => 'https://pragmaappscstg.wpengine.com/wp-content/uploads/2024/11/pixelcut-export-1.png',
-            'name' => 'Chaman Lal Exports LTD',
-            'issue' => 'Buy-Back Offer'
-        ),
-    );
+    $pods = pods('ipo_company')->find([
+        'where' => 'company_status IN ("active") and recent_issue = "True"',
+        'limit' => 3
+    ]);
+    if ($pods->total() < 1) {
+        return "
+         <div id='form-message' class='mx-md-5 mx-4 alert alert-danger mt-4' >
+                            No Data Available
+                        </div>
+        ";
+    }
     ob_start();
 ?>
-    <div class="py-4" style="width: 350px;">
+    <div class="pb-4 w-100">
         <div class="px-3 border-bottom">
-            <h3 class="text-white px-3">Recent Issues Handled</h3>
+            <p class="text-white text-center text-md-start px-1 py-4 m-0 h4 fw-bold">Recent Issues Handled</p>
         </div>
         <div class="px-3 mt-4">
-            <?php foreach ($list as $list) : ?>
-                <div class="card mb-3">
-                    <div class="row p-3">
-                        <div class="col-md-4 d-flex justify-content-center align-items-center">
-                            <img src="<?php echo $list['image_url']; ?>" class="card-image" alt="<?php echo $list['name']; ?>">
-                        </div>
-                        <div class="col-md-8">
-                            <div class="card-body">
-                                <h6 class="card-title m-0"><?php echo $list['name']; ?></h6>
-                                <p class="card-text"><?php echo $list['issue']; ?></p>
+            <div class="d-flex flex-wrap gap-3">
+                <?php while ($pods->fetch()) : ?>
+                    <?php error_log($pods->field('is_live')); ?>
+                    <?php $redirect_url = $pods->field('offer_type') != 'IPO - SME' ?
+                        site_url("open-buyback-right-issue/?company=" . $pods->field('company_code')) : site_url('ipo-allotment-form/?company=' . $pods->field('company_code'));
+                    $card_text = $pods->field('offer_type');
+                    switch ($pods->field('offer_type')) {
+                        case 'Public Issue - SME':
+                            $card_text = "SME IPO";
+                            break;
+                        case 'Buy Back Offer':
+                            $card_text = "Buyback Offer";
+                            break;
+                    }
+                    ?>
+
+                    <!-- <div class="col-12 col-md-4 mb-4 mb-md-0 px-2 d-flex flex-wrap"> -->
+                    <a class="d-flex flex-column justify-content-between align-items-start border-blue-2 rounded text-decoration-none w-100 bg-white"
+                        href="<?= $redirect_url ?>">
+                        <h5 class="m-0 mt-3 w-100 px-3 text-start"><?= strtoupper($pods->field('name')); ?></h5>
+                        <div class="d-flex py-2 px-3 align-items-center w-100">
+                            <div class="col-8 d-flex align-items-center pe-3">
+                                <?php $image_url = $pods->field('company_logo')['guid']; ?>
+                                <img src="<?= $image_url ?>" alt="<?= $pods->field('name') ?>" />
+                            </div>
+                            <div class="d-flex gap-1 col-4 align-items-center justify-content-end">
+                                <span class="d-flex gap-2 align-items-center justify-content-center text-center rounded-circle h6 text-white m-0 height-recent-circle <?= $pods->field('is_live') == 'True' ? 'bg-success' : 'bg-secondary' ?>">
+                                    <?= $card_text ?>
+                                </span>
                             </div>
                         </div>
-                    </div>
-                </div>
-            <?php endforeach; ?>
+                        <div class="w-100 d-flex justify-content-between align-items-center pb-2 px-3">
+                            <span class="d-flex gap-2 h6 text-blue">
+                                <!-- <i class="bi bi-calendar-check-fill"></i> -->
+                                <span><strong>Open:</strong> <?= date('d M, Y', strtotime(esc_html($pods->field('opening_date')))); ?></span>
+                            </span>
+                            <span class="d-flex gap-2 h6 text-blue">
+                                <!-- <i class="bi bi-calendar2-x-fill"></i> -->
+                                <span><strong>Close:</strong> <?= date('d M, Y', strtotime(esc_html($pods->field('closing_date')))); ?></span>
+                            </span>
+                        </div>
+                    </a>
+                    <!-- </div> -->
+                <?php endwhile; ?>
+            </div>
         </div>
     </div>
 
@@ -54,138 +123,45 @@ function show_recent_issue()
 
 function ipo_and_issue_handled_form()
 {
-    $company_selected = !empty($_GET['company']) ? $_GET['company'] : '';
-    $show_data = show_company_download_forms($company_selected);
+    // $company_selected = !empty($_GET['company']) ? $_GET['company'] : '';
+    // $show_data = show_company_download_forms($company_selected);
     // error_log(is_user_logged_in());
     ob_start();
 ?>
-    <div id="form5" class="form-container list-group" style="display:none; background: white;">
-        <h3 class="m-0 ms-md-4 ms-1" style="padding: 21.1px">IPO Allotment Form</h3>
-        <hr class="mt-0">
-        <?= ipo_allotment_form(); ?>
+    <div id="IPO_Allotment_Status" class="form-container list-group pt-80 pb-80" style="display:none; background: white;">
+        <?= do_shortcode('[show_ipo_allotment_form]'); ?>
     </div>
-    <div id="form2" class="form-container list-group" style="display:none; background: white;">
-        <div id="form2-company-name" class="m-0 ms-md-4 ms-1 pt-3">
-            <?php if (!empty($show_data['company'])) : ?>
-                <?= $show_data['company']; ?>
-            <?php else : ?>
-                <h4 class="m-0" style="padding: 14.4px"> IPO and Issue Handled </h4>
-            <?php endif; ?>
+    <div id="Open_Buyback_right_issue" class="form-container list-group h-100 pt-80 pb-80" style="display:none; background: white;">
+        <?= do_shortcode('[show_company_offers]'); ?>
+    </div>
+    <div id="KYC_Compliance" class="form-container list-group pt-80 pb-80" style="display:block; background: white;">
+        <?= do_shortcode('[show_kyc_compliance]'); ?>
+    </div>
+    <div id="TDS_Exemption" class="form-container list-group pt-80 pb-80" style="display:none; background: white;">
+        <?= do_shortcode('[show_SUBMISSION_OF_FORM]'); ?>
+    </div>
+    <div id="Investor_Service_Request" class="form-container list-group h-100 w-100 pt-80" style="display:none; background: white;">
+        <?= do_shortcode('[show_investor_request_page]'); ?>
+    </div>
+    <div id="Investor_Forms" class="form-container list-group h-100 w-100 px-4 px-md-5 pt-80 pb-80" style="display:none; background: white;">
+        <div class="border-bottom py-2 form-margin px-3">
+            <h2 class="fw-bold m-0">Investor Forms</h2>
         </div>
-        <hr class="mt-0">
-        <?php if (empty($company_selected)) : ?>
-            <div class="px-3 px-md-4 pb-4">
-                <?= do_shortcode('[ipo_companies_data_table filter="active"]'); ?>
-            </div>
-        <?php else : ?>
-            <?= form2_html_fn(); ?>
-        <?php endif; ?>
+        <?= do_shortcode('[show_downloads_table]'); ?>
     </div>
-    <div id="form3" class="form-container list-group" style="display:none; background: white;">
-        <div class="d-flex justify-content-between align-items-center" style="padding: 14.4px">
-            <h3 class="m-0 ms-md-4 ms-1">KYC Compliance</h3>
-            <span class="btn btn-blue d-flex px-3" onclick="changeTab('<?= site_url('/investor-request/?request_type=KYC') ?>','Investor_Service_Request')">Request KYC</span>
+    <div id="SEBI_Circulars" class="form-container list-group h-100 w-100 px-4 px-md-5 pt-80 pb-80" style="display:none; background: white;">
+        <div class="border-bottom py-2 form-margin px-3">
+            <h2 class="fw-bold m-0">SEBI Circulars</h2>
         </div>
-        <hr class="mt-0">
-        <?= kyc_complience_html(); ?>
+        <?= do_shortcode('[show_SEBI_downloads_table]'); ?>
     </div>
-    <div id="form4" class="form-container list-group" style="display:none; background: white;">
-        <h3 class="m-0 ms-md-4 ms-1" style="padding: 21.1px">SUBMISSION OF FORM 15G/15H/10F</h3>
-        <hr class="mt-0">
-        <form id="tds-exemption-form" class="tds-form px-4 px-md-5 pb-5">
-            <div id="form4-response-div"></div>
-            <div class="mb-3">
-                <label for="select_your_company" class="form-label required-label">Select your Company</label>
-                <select name="tds_company_name" id="select_your_company" class="form-select">
-                    <option value="" selected>----Select----</option>
-                    <option value="ANDHRA PRADESH STATE BEVERAGES CORPORATION LIMITED">
-                        ANDHRA PRADESH STATE BEVERAGES CORPORATION LIMITED
-                    </option>
-                </select>
-            </div>
-
-            <div class="mb-3 row">
-                <div class="col-6">
-                    <label for="financial_year" class="form-label">Financial Year</label>
-                    <select name="financial_year" id="financial_year" class="form-select">
-                        <option value="" selected>----Select----</option>
-                        <option value="2025-2024">2025-2024</option>
-                        <option value="2024-2023">2024-2023</option>
-                        <option value="2023-2022">2023-2022</option>
-                        <option value="2022-2021">2022-2021</option>
-                        <option value="2021-2020">2021-2020</option>
-                    </select>
-                </div>
-                <!-- <div class="col-1"></div> -->
-                <div class="col-6">
-                    <label for="select_exemption_form_type" class="form-label">Select Exemption Form Type</label>
-                    <select name="select_exemption_form_type" id="select_exemption_form_type" class="form-select">
-                        <option value="" selected>----Select----</option>
-                        <option value="Form 15G">Form 15G</option>
-                        <option value="Form 15H">Form 15H</option>
-                        <option value="Form 10F">Form 10F</option>
-                        <option value="ents By Entity Entitled To Exemption From TDS">
-                            ents By Entity Entitled To Exemption From TDS
-                        </option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="mb-3">
-                <label for="folio_number" class="form-label required-label">Folio Number</label>
-                <input type="text" name="folio_number" id="folio_number" class="form-control" required>
-                <p class="form-text text-muted mb-0">
-                    (e.g., NSDL: IN12345XXXXXXXXX & CDSL: 12345XXXXXXXXXXX Folio: 1234XXX)
-                </p>
-            </div>
-
-            <div class="mb-3 row">
-                <div class="col-6">
-                    <label for="pan_number" class="form-label required-label">Pan Number</label>
-                    <input type="text" name="pan_number" id="pan_number1" class="form-control" required>
-                </div>
-
-                <div class="col-6">
-                    <label for="mobile_number" class="form-label required-label">Mobile Number</label>
-                    <input type="number" name="mobile_number" id="mobile_number" class="form-control" required>
-                </div>
-            </div>
-
-            <div class="mb-3">
-                <label for="email_id" class="form-label required-label">Email Id</label>
-                <input type="email" name="email_id" id="email_id" class="form-control" required>
-            </div>
-
-            <div class="mb-3">
-                <label for="isin" class="form-label required-label">ISIN</label>
-                <input type="text" name="isin" id="isin" class="form-control" required>
-            </div>
-
-            <div class="mb-4">
-                <label for="copy_of_form_10f_submitted_at" class="form-label">Copy of Form 10f Submitted At</label>
-                <input type="file" name="copy_of_form_10f_submitted_at" id="copy_of_form_10f_submitted_at" class="form-control">
-                <small class="form-text text-muted">
-                    Income Tax Portal with its acknowledgement/ FORM15G/ FORM15H Document by entity entitled to exemption from TDS (File Format PDF/JPG/PNG/GIF)
-                </small>
-                <div class="show-uploaded-form2-list"></div>
-            </div>
-
-            <div class="mb-3 text-center">
-                <button type="submit" class="btn btn-blue form4_non_loader">Submit</button>
-                <button class="btn btn-blue form4_submit_loader text-white" type="button" disabled style="display:none;">
-                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                    Saving Details...
-                </button>
-            </div>
-        </form>
-    </div>
-    <div id="form1" class="form-container list-group h-100 w-100" style="display:block; background: white;">
-        <div class="h-100 w-100">
-            <?php if (is_user_logged_in()) : ?>
-                <?= do_shortcode('[load_ticket_page]'); ?>
-            <?php else : ?>
-                <?= do_shortcode('[login_signup_form]'); ?>
-            <?php endif; ?>
+    <div id="loading-screen-1" class="d-flex w-100 h-100 bg-white px-md-5 p-4 hidden" style="z-index: 10500; margin-top: 80px;">
+        <div class="d-flex flex-column placeholder-glow gap-2 w-100 p-3">
+            <span class="p-3 col-6 placeholder rounded"></span>
+            <hr class="m-0 form-margin" />
+            <span class="p-2 col-12 placeholder rounded"></span>
+            <span class="p-2 col-12 placeholder rounded"></span>
+            <span class="p-2 col-2 placeholder rounded"></span>
         </div>
     </div>
 <?php
@@ -409,7 +385,73 @@ function tax_forms_table()
     return ob_get_clean();
 }
 
+function UserHasCompanyRole()
+{
+    if (!is_user_logged_in()) {
+        return false;
+    }
+
+    $user = wp_get_current_user();
+    $allowed_roles = ['wpas_company_user', 'wpas_company_admin'];
+
+    foreach ($user->roles as $role) {
+        if (in_array($role, $allowed_roles, true)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 add_shortcode('show_SEBI_downloads_table', function () {
+    $data = [
+        ["Format" => "SEBI Circulars", "Format Usage" => "SEBI_circular_031121.PDF", "Download URL" => "https://pragmaappscstg.wpengine.com/wp-content/uploads/2025/02/SEBI_circular_031121-1.pdf"],
+        ["Format" => "SEBI Circulars", "Format Usage" => "SEBI_Circular_261121.pdf", "Download URL" => "https://pragmaappscstg.wpengine.com/wp-content/uploads/2025/02/SEBI_Circular_261121.pdf"],
+        ["Format" => "SEBI Circulars", "Format Usage" => "SEBI_CIRCULAR_August 04, 2023.pdf", "Download URL" => "#"],
+        ["Format" => "SEBI Circulars", "Format Usage" => "SEBI_Circular_For_Change of RTA with Draft Aggrement.pdf", "Download URL" => "https://pragmaappscstg.wpengine.com/wp-content/uploads/2025/02/SEBI_Circular_For_Change-of-RTA-with-Draft-Aggrement.pdf"],
+        ["Format" => "SEBI Circulars", "Format Usage" => "SEBI_CIRCULAR_July 31, 2023.pdf", "Download URL" => "#"],
+        ["Format" => "SEBI Circulars", "Format Usage" => "SEBI_KYC_CIRCULAR_DATED_160323.pdf", "Download URL" => "https://pragmaappscstg.wpengine.com/wp-content/uploads/2025/02/SEBI_KYC_CIRCULAR_DATED_160323.pdf"],
+    ];
+    $pods = pods('form_download')->find([
+        'where' => 'form_type = "Circulars"',
+        'limit' => -1
+    ]);
+    if ($pods->total() < 1) {
+        return "  <div class='mx-md-5 mx-4 alert alert-danger mt-4' >
+                            No Data Available
+                        </div>";
+    }
+    $response_data = [];
+    while ($pods->fetch()) {
+        array_push($response_data, [
+            'name' => $pods->field('name'),
+            'form_description' => $pods->field('form_description'),
+            'form_title' => $pods->field('form_title'),
+            'form_type' => $pods->field('form_type'),
+            'form_url' => $pods->field('form_url')['guid'],
+        ]);
+    }
+    ob_start(); ?>
+    <table class="tax-forms-table table-bordered table-striped rounded-top d-none d-md-table">
+        <thead class="rounded-top">
+            <tr>
+                <th class="text-center col-1" style="width: 10px;">#</th>
+                <th class="text-start col-3">File Name</th>
+                <th class="text-start col-7">File Description</th>
+                <th class="text-center col-1">Action</th>
+            </tr>
+        </thead>
+        <tbody id="circular_table_data">
+        </tbody>
+    </table>
+    <div class="d-md-none" id="circular_data_mobile"></div>
+    <div id="circular_table_pagination" class="d-flex gap-4 justify-content-center flex-wrap">
+    </div>
+<?php
+    return ob_get_clean();
+});
+
+add_shortcode('show_SEBI_downloads_table_2', function () {
     $data = [
         ["Format" => "SEBI Circulars", "Format Usage" => "SEBI_circular_031121.PDF", "Download URL" => "https://pragmaappscstg.wpengine.com/wp-content/uploads/2025/02/SEBI_circular_031121-1.pdf"],
         ["Format" => "SEBI Circulars", "Format Usage" => "SEBI_Circular_261121.pdf", "Download URL" => "https://pragmaappscstg.wpengine.com/wp-content/uploads/2025/02/SEBI_Circular_261121.pdf"],
@@ -455,18 +497,57 @@ add_shortcode('login_user_header', function () {
         return;
     }
     $current_user = wp_get_current_user();
+    $user_information = pods('user', get_current_user_id());
+    $email = $user_information->field('client_email');
+    if (empty($email)) {
+        $email = $current_user->user_email;
+    }
+    if (UserHasCompanyRole()) {
+        $email = $user_information->field('display_name');
+    }
+    // error_log(print_r($current_user, true));
     ob_start(); ?>
-    <a href="<?= site_url('investor-request/#Investor_Service_Request') ?>" class="text-decoration-none d-flex align-items-center gap-3">
-        <div class="d-flex align-items-center gap-3">
+    <!-- <div class="d-flex align-items-center gap-2">
+        <a href="<?= site_url('investor-request') ?>" class="text-decoration-none d-flex align-items-center gap-2">
             <div class="rounded-circle text-white d-flex justify-content-center align-items-center h5 mb-0" style="width: 35px; height: 35px; background: #ffc03dcf;">
-                <div class="rounded-circle text-white d-flex justify-content-center align-items-center h5 mb-0" style="width: 30px; height: 30px; background: #ffc03d;"> <?= strtoupper(substr($current_user->user_login, 0, 1)) ?></div>
+                <div class="rounded-circle text-white d-flex justify-content-center align-items-center h5 mb-0" style="width: 30px; height: 30px; background: #ffc03d;"> <?= strtoupper(substr($email ?? $current_user->user_login, 0, 1)) ?></div>
             </div>
-            <p class="text-white text-center mb-0">Welcome, <?= ucwords($current_user->user_login) ?></p>
+            <p class="text-white text-center mb-0"><?= ucfirst($email) ?? ucfirst($current_user->user_login) ?></p>
+        </a>
+        <i class="bi bi-chevron-down text-white"></i>
+    </div> -->
+    <!-- <div class="btn-group">
+        <button class="d-flex align-items-center gap-2 dropdown-toggle" id="dropdownMenu2" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <div class="rounded-circle text-white d-flex justify-content-center align-items-center h5 mb-0" style="width: 35px; height: 35px; background: #ffc03dcf;">
+                <div class="rounded-circle text-white d-flex justify-content-center align-items-center h5 mb-0" style="width: 30px; height: 30px; background: #ffc03d;"> <?= strtoupper(substr($email ?? $current_user->user_login, 0, 1)) ?></div>
+            </div>
+            <p class="text-white text-center mb-0"><?= ucfirst($email) ?? ucfirst($current_user->user_login) ?></p>
+            <i class="bi bi-chevron-down text-white"></i>
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+            <div class=""> <i class="bi bi-chevron-down text-white"></i> Logout</div>
         </div>
-    </a>
+    </div> -->
+    <div class="dropdown">
+        <div class="d-flex align-items-center gap-2 text-white dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+            <div class="rounded-circle text-white d-flex justify-content-center align-items-center h5 mb-0" style="width: 35px; height: 35px; background: #ffc03dcf;">
+                <div class="rounded-circle text-white d-flex justify-content-center align-items-center h5 mb-0" style="width: 30px; height: 30px; background: #ffc03d;"> <?= strtoupper(substr($email ?? $current_user->user_login, 0, 1)) ?></div>
+            </div>
+            <p class="text-white text-center mb-0"><?= ucfirst($email) ?? ucfirst($current_user->user_login) ?></p>
+        </div>
+        <ul class="dropdown-menu mt-1 py-1 p-0 <?= UserHasCompanyRole() ? '' : 'width_webkit' ?>" aria-labelledby="dropdownMenuButton">
+            <li><a class="dropdown-item text-blue py-3" href="<?= UserHasCompanyRole() ? site_url('client-services/?tab=client_information') : site_url('investor-services/#Investor_Service_Request') ?>">
+                    <i class="bi bi-<?= UserHasCompanyRole() ? 'buildings' : 'person' ?> me-2"></i>
+                    <?= UserHasCompanyRole() ? 'Client Information' : 'Investor Information' ?>
+                </a></li>
+            <li id="logout-user-header" class="border-top"><a class="dropdown-item text-blue py-3" href="#"> <i class="bi bi-box-arrow-right me-2"></i>
+                    Logout</a></li>
+        </ul>
+    </div>
     <script>
         jQuery(document).ready(async function($) {
             $(".ast-header-button-1").hide();
+            $(".client-login-header-css").hide();
         });
     </script>
 <?php
@@ -474,6 +555,58 @@ add_shortcode('login_user_header', function () {
 });
 
 add_shortcode('show_downloads_table', function () {
+    $pods = pods('form_download')->find([
+        'where' => 'form_type = "Downloads"',
+        'limit' => -1
+    ]);
+    $data = [
+        ["Format" => "Investor Charter", "Format Usage" => "Investor Charter for RTA.", "Download URL" => "https://www.beetalmail.com/forms/RTA_INVESTOR_CHARTER.pdf"],
+        ["Format" => "Investor Complaint Summary", "Format Usage" => "Investor Complaint Summary as per SEBI Circular", "Download URL" => "https://www.beetalmail.com/forms/BEETAL_INVESTOR_COMLAINT_SUMMARY.PDF"],
+        ["Format" => "SEBI Circulars", "Format Usage" => "Circular for KYC details like updation of Address Bank details PAN Nomination, Signature etc.", "Download URL" => "https://pragmaappscstg.wpengine.com/contact/#circulars"],
+        ["Format" => "FORM ISR-1", "Format Usage" => "Format for Request for Registering PAN, KYC details for Changes/Updation etc.", "Download URL" => "https://www.beetalmail.com/forms/Form%20ISR-1.PDF"],
+        ["Format" => "FORM ISR-2", "Format Usage" => "Updation/Confirmation of Signature of securities holder by the Banker", "Download URL" => "https://pragmaappscstg.wpengine.com/wp-content/uploads/2025/02/FORM-ISR-2-2.doc"],
+        ["Format" => "FORM ISR-3", "Format Usage" => "Declaration Form for Opting-out of Nomination", "Download URL" => "https://pragmaappscstg.wpengine.com/wp-content/uploads/2025/02/FORM-ISR-3-2.doc"],
+        ["Format" => "FORM ISR-4", "Format Usage" => "Request for issue of Duplicate Certificate", "Download URL" => "https://pragmaappscstg.wpengine.com/wp-content/uploads/2025/02/FORM-ISR-4.pdf"],
+        ["Format" => "FORM SH-13", "Format Usage" => "Nomination Registration", "Download URL" => "https://pragmaappscstg.wpengine.com/wp-content/uploads/2025/02/FORM-SH-13.doc"],
+        ["Format" => "FORM SH-14", "Format Usage" => "Cancellation or Variation of Nomination", "Download URL" => "https://pragmaappscstg.wpengine.com/wp-content/uploads/2025/02/FORM-SH-14.doc"],
+        ["Format" => "SEBI Circular dated 26th November 2021", "Format Usage" => "Investor charter and disclosure of complaints", "Download URL" => "https://www.beetalmail.com/forms/SEBI_Circular_261121.pdf"],
+        ["Format" => "Change of Name", "Format Usage" => "Format for change of Name", "Download URL" => "https://pragmaappscstg.wpengine.com/wp-content/uploads/2025/02/change_of_name-2.doc"],
+        ["Format" => "Deletion of Name", "Format Usage" => "Name Deletion for Joint Holder in case of Death", "Download URL" => "https://pragmaappscstg.wpengine.com/wp-content/uploads/2025/02/deletion_of_name.doc"],
+        ["Format" => "Transfer of Share", "Format Usage" => "Instruction for Transfer of Shares", "Download URL" => "https://pragmaappscstg.wpengine.com/wp-content/uploads/2025/02/FOLIO_CONSOLIDATION.doc"],
+        ["Format" => "Transmission of Shares", "Format Usage" => "Transmission of Shares after the death of the Registered Share Holder", "Download URL" => "https://pragmaappscstg.wpengine.com/wp-content/uploads/2025/02/transmission_after_death.doc"],
+        ["Format" => "Transposition of Shares", "Format Usage" => "Transpositioning of Names", "Download URL" => "https://pragmaappscstg.wpengine.com/wp-content/uploads/2025/02/Transposition-1.doc"],
+        ["Format" => "Issue of Duplicate Share Certificates (For Holder)", "Format Usage" => "Format for obtaining the duplicate share certificate (For Holder)", "Download URL" => "https://pragmaappscstg.wpengine.com/wp-content/uploads/2025/02/duplicate_for_holder.doc"],
+        ["Format" => "Issue of Duplicate Share Certificates (For Buyer)", "Format Usage" => "Format for obtaining the duplicate share certificate (For Buyer)", "Download URL" => "https://pragmaappscstg.wpengine.com/wp-content/uploads/2025/02/duplicate_for_buyer.doc"],
+        ["Format" => "Demat of Share", "Format Usage" => "Procedure for Demat of Securities", "Download URL" => "https://pragmaappscstg.wpengine.com/wp-content/uploads/2025/02/ECS.doc"],
+        ["Format" => "Indemnity Bond (For CAN / Refund Order/ Interest / Dividend Warrants)", "Format Usage" => "Format for obtaining Duplicate Refund Order/Interest Warrant/Dividend warrant", "Download URL" => "https://pragmaappscstg.wpengine.com/wp-content/uploads/2025/02/letter_duplicate_warrant.doc"],
+        ["Format" => "Remat of Share", "Format Usage" => "Procedure for Remat of Securites", "Download URL" => "https://pragmaappscstg.wpengine.com/wp-content/uploads/2025/02/15G_FORM-1.doc"],
+    ];
+    if ($pods->total() < 1) {
+        return "  <div class='mx-md-5 mx-4 alert alert-danger mt-4' >
+                            No Data Available
+                        </div>";
+    }
+    ob_start(); ?>
+    <table class="tax-forms-table table-bordered table-striped rounded-top d-none d-md-table">
+        <thead class="rounded-top">
+            <tr>
+                <th class="text-center col-1" style="width: 10px;">#</th>
+                <th class="text-start col-3">File Name</th>
+                <th class="text-start col-7">File Description</th>
+                <th class="text-center col-1">Action</th>
+            </tr>
+        </thead>
+        <tbody id="download_table_data">
+
+        </tbody>
+    </table>
+    <div class="d-md-none" id="download_data_mobile"></div>
+    <div id="download_table_pagination" class="d-flex gap-4 justify-content-center flex-wrap">
+    </div>
+<?php
+    return ob_get_clean();
+});
+add_shortcode('show_downloads_table_2', function () {
     $pods = pods('form_download')->find([
         'where' => 'form_type = "Downloads"',
         'limit' => -1
@@ -531,49 +664,67 @@ add_shortcode('show_downloads_table', function () {
 add_shortcode('show_menu', function () {
     $menuList = array(
         array(
+            'image_url' => 'https://pragmaappscstg.wpengine.com/wp-content/uploads/2024/11/Sekuritance-KYC-Compliance-600x300-1.jpg',
+            'title' => 'KYC Compliance',
+            'sub_title' => 'Click here to open KYC Compliances form.',
+            'form' => 'KYC_Compliance',
+            'tab' => 'tab3',
+            'hash' => 'KYC_Compliance',
+            'icon' => 'person-check-fill'
+        ),
+        array(
             'image_url' => 'https://pragmaappscstg.wpengine.com/wp-content/uploads/2024/11/images-2-2.jpg',
             'title' => 'IPO Allotment Status',
             'sub_title' => 'Click here to open form of acceptance from open offer.',
-            'form' => 'form5',
+            'form' => 'IPO_Allotment_Status',
             'tab' => 'tab5',
             'hash' => 'IPO_Allotment_Status',
             'icon' => 'file-earmark-text-fill'
         ),
         array(
             'image_url' => 'https://pragmaappscstg.wpengine.com/wp-content/uploads/2024/11/buyback-2.webp',
-            'title' => 'Open/Buy Back/Rights Issue',
+            'title' => 'Open/Buyback Offer',
             'sub_title' => 'Click here to open offer handeled by as Registrar.',
-            'form' => 'form2',
+            'form' => 'Open_Buyback_right_issue',
             'tab' => 'tab2',
             'hash' => 'Open_Buyback_right_issue',
             'icon' => 'cash-stack'
         ),
         array(
-            'image_url' => 'https://pragmaappscstg.wpengine.com/wp-content/uploads/2024/11/Sekuritance-KYC-Compliance-600x300-1.jpg',
-            'title' => 'KYC Compliance',
-            'sub_title' => 'Click here to open KYC Compliances form.',
-            'form' => 'form3',
-            'tab' => 'tab3',
-            'hash' => 'KYC_Compliance',
-            'icon' => 'person-check-fill'
-        ),
-        array(
             'image_url' => 'https://pragmaappscstg.wpengine.com/wp-content/uploads/2024/11/TDS-Exemption-1.png',
             'title' => 'TDS Exemption',
             'sub_title' => 'Click here to open TDS Exemption form.',
-            'form' => 'form4',
+            'form' => 'TDS_Exemption',
             'tab' => 'tab4',
             'hash' => 'TDS_Exemption',
             'icon' => 'file-earmark-excel-fill'
         ),
         array(
             'image_url' => 'https://pragmaappscstg.wpengine.com/wp-content/uploads/2024/11/pexels-photo-6771900-6771900.jpg',
-            'title' => 'Investor Service Request',
+            'title' => 'Investor Request',
             'sub_title' => 'Click here to open',
-            'form' => 'form1',
+            'form' => 'Investor_Service_Request',
             'tab' => 'tab1',
             'hash' => 'Investor_Service_Request',
             'icon' => 'person-fill-gear'
+        ),
+        array(
+            'image_url' => '',
+            'title' => 'Investor Forms',
+            'sub_title' => 'Click here to open',
+            'form' => 'Investor_Forms',
+            'tab' => 'tab6',
+            'hash' => 'Investor_Forms',
+            'icon' => 'cloud-arrow-down-fill'
+        ),
+        array(
+            'image_url' => '',
+            'title' => 'SEBI Circulars',
+            'sub_title' => 'Click here to open',
+            'form' => 'SEBI_Circulars',
+            'tab' => 'tab7',
+            'hash' => 'SEBI_Circulars',
+            'icon' => 'circle-fill'
         ),
         // array(
         //     'image_url' => '',
@@ -594,46 +745,52 @@ add_shortcode('show_menu', function () {
     );
     $tab = !empty($_GET['tab']) ? $_GET['tab'] : '';
 
-    $redirect_url = site_url('/investor-request');
+    $redirect_url = site_url('/investor-services');
     ob_start(); ?>
-    <div class="d-flex justify-content-between align-items-center py-4 border-bottom px-4">
-        <a href="<?= site_url() ?>" class="d-flex align-items-center h4 text-white justify-content-center m-0 text-decoration-none"><i class="bi bi-arrow-left-circle me-4"></i>Go to BEETAL</a>
-        <i id="menuToggleIcon" class="bi bi-chevron-down text-white fs-3 d-md-none" data-bs-toggle="collapse" data-bs-target="#menuCollapse" aria-expanded="false" aria-controls="menuCollapse"></i>
+    <div class="d-flex d-md-none justify-content-between align-items-center p-4 border-bottom menu-items">
+        <a href="<?= $_SERVER['HTTP_REFERER'] ?? site_url() ?>" class="d-flex align-items-center h4 text-white justify-content-center m-0 text-decoration-none"><i class="bi bi-back mx-2 fs-2 text-black"></i>
+            <p class="h5 m-0">Back</p>
+        </a>
+        <i id="menuToggleIcon" class="bi bi-chevron-down text-dark fs-3" data-bs-toggle="collapse" data-bs-target="#menuCollapse" aria-expanded="false" aria-controls="menuCollapse"></i>
     </div>
 
     <!-- Collapsible content -->
-    <div class="collapse d-md-block" id="menuCollapse">
+    <div class="collapse d-md-block pt-80 pb-80" id="menuCollapse">
         <div class="text-black p-0 m-0">
             <ul class="nav flex-column m-0">
-                <?php foreach ($menuList as $item): ?>
+                <?php
+                $sno = 1;
+                foreach ($menuList as $item): ?>
                     <?php
-                    $redirect_url = site_url('/investor-request?tab=dashboard');
+                    $redirect_url = site_url('/investor-services?tab=dashboard');
                     ?>
                     <!-- <a href="<?= site_url('/investor-request#' . $item['hash'] . '') ?>" class="text-decoration-none"> -->
                     <li id="<?php echo $item['form'] . $item['tab'] ?>"
-                        class="d-flex align-items-center justify-content-between border-bottom py-3 ps-3 menu-items <?php echo $item['form'] == 'form1' ? 'menu-active' : 'text-white' ?>"
+                        class="d-flex align-items-center justify-content-between py-3 px-3 menu-items mycustomClass <?= $sno == 1 ? 'first-child-left' : '' ?> <?php echo $item['form'] == 'Investor_Service_Request' ? 'menu-active' : 'text-white' ?>"
                         style="cursor: pointer;"
-                        onclick="changeTab('<?= $redirect_url ?>','<?= $item['hash'] ?>')">
+                        onclick="changeTab('<?= $redirect_url ?>','<?= $item['hash'] ?>','<?= is_user_logged_in() ?>')">
                         <span class="d-flex align-items-center justify-space-between gap-2" style="font-weight: 500;">
                             <!-- <img src="<?php echo $item['image_url'] ?>" class="me-2 border-y-1" style="width:40px; height:40px; border-radius: 100%; min-width:40px;" /> -->
-                            <span class="text-white rounded-circle d-flex justify-content-center align-items-center" style="min-height: 50px; min-width: 50px; width: 50px; height: 50px;">
+                            <span class="text-white rounded-circle d-flex justify-content-center align-items-center bg-theme-blue" style="min-height: 50px; min-width: 50px; width: 50px; height: 50px; margin-right: 10px;">
                                 <i class="bi bi-<?= $item['icon'] ?> fs-2"></i>
                             </span>
-                            <p class="m-0 h6"><?php echo esc_html($item['title']); ?></p>
+                            <p class="m-0 h5"><?php echo esc_html($item['title']); ?></p>
                         </span>
                     </li>
                     <!-- </a> -->
-                <?php endforeach; ?>
+                <?php
+                    $sno++;
+                endforeach; ?>
                 <?php if (is_user_logged_in()) : ?>
                     <li
-                        class="d-flex align-items-end justify-content-between border-bottom py-3 ps-3 menu-items text-white"
+                        class="d-flex align-items-end justify-content-between mycustomClass py-3 px-3 menu-items text-white"
                         style="cursor: pointer;"
                         onclick="logoutUser()">
-                        <span class="d-flex align-items-center justify-space-between gap-2" style="font-weight: 500;">
-                            <span class="text-white rounded-circle d-flex justify-content-center align-items-center" style="min-height: 50px; min-width: 50px; width: 50px; height: 50px;">
+                        <span class="d-flex align-items-center justify-space-between gap-2 h5" style="font-weight: 500;">
+                            <span class="text-white rounded-circle d-flex justify-content-center align-items-center bg-theme-blue" style="min-height: 50px; min-width: 50px; width: 50px; height: 50px; margin-right: 10px;">
                                 <i class="bi bi-power ?> fs-2"></i>
                             </span>
-                            Logout
+                            <p class="m-0 h5">Logout</p>
                         </span>
                     </li>
                 <?php endif; ?>
@@ -768,19 +925,20 @@ add_shortcode('show_latest_ipo_table', function () {
 add_shortcode('show_form_list', function () {
     if (!empty(get_current_user_id())) {
         $roles = get_userdata(get_current_user_id())->roles;
-        if (!empty($roles) && $roles[0] == 'wpas_company_user') {
+        if (!empty($roles) && $roles[0] == 'wpas_company_user' && $roles[0] == 'wpas_company_admin') {
             redirect_company_user_shortcode();
         }
     }
     ob_start();
 ?>
-    <div id="main-section" class="d-flex align-items-start flex-md-nowrap flex-wrap">
-        <div class="flex-grow-1 h-100" id="left-section">
+    <div id="main-section" class="d-flex align-items-start flex-md-nowrap flex-wrap w-100 h-100 bg-white">
+        <div class="flex-grow-1 h-100 w-100 height-adjust-md">
             <?php echo ipo_and_issue_handled_form() ?>
         </div>
-        <div class="align-items-start d-flex h-100 text-white" id="right-section" style="background-color: #212D45;">
-            <?php echo ipo_and_issues_list_function() ?>
+        <div class="align-items-start d-flex h-100 text-white pt-80" id="right-section-div" style="background-color: #F5F5F5;">
+            <?= show_active_company_list() ?>
         </div>
+
     </div>
 <?php
     return ob_get_clean();
