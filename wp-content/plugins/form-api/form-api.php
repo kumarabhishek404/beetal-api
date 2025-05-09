@@ -10,24 +10,40 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// 1.  Move CORS headers to wp-config.php (Recommended)
+//    This is the most reliable way to set headers, as it happens before WordPress loads.
+//
+//    Add these lines to your wp-config.php file, *before* the `/* That's all, stop editing! Happy blogging. */` line:
+//
+//    header("Access-Control-Allow-Origin: *");
+//    header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+//    header("Access-Control-Allow-Headers: Content-Type, Authorization, X-API-KEY");
+//
+//    If you do this, you can remove the add_action('init', 'set_cors_headers');  and set_cors_headers() function
+//    from this plugin file.
+
+// 2. (Alternative)  CORS Headers in functions.php (If wp-config.php is not an option)
+//    If you can't edit wp-config.php, try adding the headers to your theme's functions.php file.
+//    This is less reliable than wp-config.php, but better than setting them in the plugin.
+//
+// function set_cors_headers() {
+//     header("Access-Control-Allow-Origin: *");
+//     header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+//     header("Access-Control-Allow-Headers: Content-Type, Authorization, X-API-KEY");
+// }
+// add_action('init', 'set_cors_headers');
 
 function handle_cfp_submit_tds_form_custome_fn()
 {
     // Process form data
-    $financial_year =
-        sanitize_text_field($_POST['financial_year']);
-    $folio_number =
-        sanitize_text_field($_POST['folio_number']);
-    $company =
-        sanitize_text_field($_POST['tds_company_name']);
+    $financial_year = sanitize_text_field($_POST['financial_year']);
+    $folio_number = sanitize_text_field($_POST['folio_number']);
+    $company = sanitize_text_field($_POST['tds_company_name']);
     $select_exemption_form_type = sanitize_text_field($_POST['select_exemption_form_type']);
     $pan_number = sanitize_text_field($_POST['pan_number']);
-    $email =
-        sanitize_text_field($_POST['email_id']);
-    $phone =
-        sanitize_text_field($_POST['mobile_number']);
-    $isin =
-        sanitize_text_field($_POST['isin']);
+    $email = sanitize_text_field($_POST['email_id']);
+    $phone = sanitize_text_field($_POST['mobile_number']);
+    $isin = sanitize_text_field($_POST['isin']);
 
     if (empty($folio_number)) {
         wp_send_json_error('Folio Number is required.');
@@ -46,47 +62,42 @@ function handle_cfp_submit_tds_form_custome_fn()
     }
 
     // Handle file uploads (if needed)
-    error_log(print_r($_FILES['files'], true));
-    $uploaded_files = [];
+    error_log(print_r($_FILES, true)); // Log the entire $_FILES array for debugging.
+    $uploaded_file_id = 0; // Changed to store a single attachment ID
 
-    if (isset($_FILES['files']) && !empty($_FILES['files']['name'][0])) {
+    if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) { // Changed from $_FILES['files'] to $_FILES['file']
         require_once ABSPATH . 'wp-admin/includes/file.php';
         require_once ABSPATH . 'wp-admin/includes/media.php';
         require_once ABSPATH . 'wp-admin/includes/image.php';
 
-        foreach ($_FILES['files']['name'] as $key => $value) {
+        $file = [
+            'name' => $_FILES['file']['name'],
+            'type' => $_FILES['file']['type'],
+            'tmp_name' => $_FILES['file']['tmp_name'],
+            'error' => $_FILES['file']['error'],
+            'size' => $_FILES['file']['size'],
+        ];
 
-            if ($_FILES['files']['error'][$key] === UPLOAD_ERR_OK) {
-                $file = [
-                    'name' => $_FILES['files']['name'][$key],
-                    'type' => $_FILES['files']['type'][$key],
-                    'tmp_name' => $_FILES['files']['tmp_name'][$key],
-                    'error' => $_FILES['files']['error'][$key],
-                    'size' => $_FILES['files']['size'][$key],
-                ];
+        // Upload file to WordPress media library
+        $upload = wp_handle_upload($file, ['test_form' => false]);
 
-                // Upload file to WordPress media library
-                $upload = wp_handle_upload($file, ['test_form' => false]);
-
-                if (!isset($upload['error']) && isset($upload['url'])) {
-                    // Insert the uploaded file into WordPress Media Library
-                    $attachment = [
-                        'guid' => $upload['url'],
-                        'post_mime_type' => $file['type'],
-                        'post_title' => sanitize_file_name($file['name']),
-                        'post_content' => '',
-                        'post_status' => 'inherit'
-                    ];
-                    $attach_id = wp_insert_attachment($attachment, $upload['file']);
-                    $uploaded_files[] = wp_get_attachment_url($attach_id);
-                } else {
-                    error_log("File upload error: " . $upload['error']);
-                    continue;
-                }
-            }
+        if (!isset($upload['error']) && isset($upload['url'])) {
+            // Insert the uploaded file into WordPress Media Library
+            $attachment = [
+                'guid' => $upload['url'],
+                'post_mime_type' => $file['type'],
+                'post_title' => sanitize_file_name($file['name']),
+                'post_content' => '',
+                'post_status' => 'inherit'
+            ];
+            $uploaded_file_id = wp_insert_attachment($attachment, $upload['file']); // Store the attachment ID.
+        } else {
+            error_log("File upload error: " . $upload['error']);
+            wp_send_json_error('File upload failed: ' . $upload['error']); // Send error message
+            return;
         }
     }
-    error_log("Uploaded Files => " . print_r($uploaded_files, true));
+    error_log("Uploaded File ID => " . print_r($uploaded_file_id, true));
 
     // Save the ticket in Pods or the database
     $request_id = pods('tds_exemption_form')->add([
@@ -99,7 +110,7 @@ function handle_cfp_submit_tds_form_custome_fn()
         'email_id' => $email,
         'name' => $email,
         'phone' => $phone,
-        'files' => json_encode($uploaded_files),
+        'file' => $uploaded_file_id, // Store the attachment ID in the 'file' field
     ]);
 
     // Redirect with success or failure
@@ -111,7 +122,6 @@ function handle_cfp_submit_tds_form_custome_fn()
         return;
     }
 }
-
 
 function fetch_ipo_allotment_details_custom_fn()
 {
@@ -330,6 +340,86 @@ function get_company_detail_by_code_api() {
     }
 }
 
+function get_admin_pod_data_tds_option() {
+    $pod_name = 'tds_option';
+    error_log("Fetching data from pod: $pod_name");
+
+    if (!function_exists('pods')) {
+        error_log("Pods plugin not installed.");
+        return new WP_Error('pods_not_installed', 'Pods plugin is not installed.', ['status' => 500]);
+    }
+
+    // Step 1: Fetch custom-defined financial years safely
+    $financial_years = [];
+    $companies = [];
+    $download_forms = [];
+    $pod_object = pods_api()->load_pod(['name' => $pod_name]);
+
+    if (!empty($pod_object['fields']['financial_year']['options']['pick_custom'])) {
+        $pick_val_raw = $pod_object['fields']['financial_year']['options']['pick_custom'] ?? '';
+        $financial_years = is_array($pick_val_raw)
+            ? array_values($pick_val_raw)
+            : array_map('trim', explode("\n", $pick_val_raw));
+        error_log("Financial Years (initial): " . print_r($financial_years, true));
+    } else {
+        error_log("No custom financial_years found.");
+    }
+
+    if (!empty($pod_object['fields']['companies']['options']['pick_custom'])) {
+        $pick_val_raw = $pod_object['fields']['companies']['options']['pick_custom'] ?? '';
+        $companies = is_array($pick_val_raw)
+            ? array_values($pick_val_raw)
+            : array_map('trim', explode("\n", $pick_val_raw));
+        error_log("companies (initial): " . print_r($companies, true));
+    } else {
+        error_log("No custom companies found.");
+    }
+
+    // Fetch Pods data
+    $download_form_raw = pods('form_download', [
+        'where' => 'form_type = "TDS"',
+        'limit' => -1
+    ]);
+
+    $download_forms = [];
+    while ($download_form_raw->fetch()) {
+        array_push($download_forms, [
+            'name' => $download_form_raw->field('name'),
+            'form_description' => $download_form_raw->field('form_description'),
+            'form_title' => $download_form_raw->field('form_title'),
+            'form_type' => $download_form_raw->field('form_type'),
+            'form_url' => $download_form_raw->field('form_url')['guid'],
+        ]);
+    }
+
+    error_log("download_forms0000----- (initial): " . print_r($download_forms, true));
+
+
+    $params = [
+        'limit' => -1,
+        'orderby' => 'created ASC'
+    ];
+
+    $pod = pods($pod_name, $params);
+
+    //check if pod object is valid
+     if ( is_object($pod) && $pod->error() ) {
+        $error_message = $pod->get_error_message();
+        error_log("Pods error: $error_message");
+        return new WP_Error( 'pods_error', "Error fetching data from Pod: $error_message", array( 'status' => 500 ) );
+    }
+
+    $output_data = [
+        'financial_years' => $financial_years,
+        'companies'       => $companies,
+        'download_forms'  => $download_forms
+    ];
+
+    return rest_ensure_response($output_data);
+}
+
+
+
 // Register REST route
 function my_custom_register_form_api_route()
 {
@@ -354,7 +444,13 @@ function my_custom_register_form_api_route()
     register_rest_route('api/v1', '/company/detailsByCode', array(
         'methods'  => 'POST',
         'callback' => 'get_company_detail_by_code_api',
-        'permission_callback' => '__return_true' // For public access
+        'permission_callback' => '__return_true'
+    ));
+
+    register_rest_route('api/v1', '/meta-options', array(
+        'methods'  => 'GET',
+        'callback' => 'get_admin_pod_data_tds_option',
+        'permission_callback' => '__return_true'
     ));
 }
 add_action('rest_api_init', 'my_custom_register_form_api_route');

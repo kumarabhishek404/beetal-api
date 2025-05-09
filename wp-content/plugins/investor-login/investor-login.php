@@ -6,16 +6,6 @@
  * Author: Abhishek Kumar
  */
 
- header("Access-Control-Allow-Origin: *");
- header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
- header("Access-Control-Allow-Headers: Authorization, Content-Type, x-api-key");
-
-// Handle preflight OPTIONS request
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
-}
-
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
@@ -206,7 +196,7 @@ function verify_pan_info_function_custom(WP_REST_Request $request)
         'headers' => [
             'Content-Type' => 'application/json',
             'Authorization' => 'Bearer ' . $api_token,
-            'x-api-key'    => $api_key,
+            'x-api-key'     => $api_key,
         ],
         'body'    => json_encode($payload),
         'timeout' => 15,
@@ -275,74 +265,79 @@ function verify_pan_info_function_custom(WP_REST_Request $request)
     ]);
 }
 
-function get_admin_pod_data_tds_option() {
-    $pod_name = 'tds_option';
-    error_log("Fetching data from pod: $pod_name");
+// function get_admin_pod_data_tds_option() {
+//     $pod_name = 'tds_option';
+//     error_log("Fetching data from pod: $pod_name");
 
-    if (!function_exists('pods')) {
-        error_log("Pods plugin not installed.");
-        return new WP_Error('pods_not_installed', 'Pods plugin is not installed.', ['status' => 500]);
-    }
+//     if (!function_exists('pods')) {
+//         error_log("Pods plugin not installed.");
+//         return new WP_Error('pods_not_installed', 'Pods plugin is not installed.', ['status' => 500]);
+//     }
 
-    // Step 1: Fetch custom-defined financial years safely
-    $financial_years = [];
-    $companies = [];
-    $download_forms = [];
-    $pod_object = pods_api()->load_pod(['name' => $pod_name]);
+//     // Step 1: Fetch custom-defined financial years safely
+//     $financial_years = [];
+//     $companies = [];
+//     $download_forms = [];
+//     $pod_object = pods_api()->load_pod(['name' => $pod_name]);
 
-    if (!empty($pod_object['fields']['financial_year']['options']['pick_custom'])) {
-        $pick_val_raw = $pod_object['fields']['financial_year']['options']['pick_custom'] ?? '';
-        $financial_years = is_array($pick_val_raw)
-            ? array_values($pick_val_raw)
-            : array_map('trim', explode("\n", $pick_val_raw));
-        error_log("Financial Years (initial): " . print_r($financial_years, true));
-    } else {
-        error_log("No custom financial_years found.");
-    }
+//     if (!empty($pod_object['fields']['financial_year']['options']['pick_custom'])) {
+//         $pick_val_raw = $pod_object['fields']['financial_year']['options']['pick_custom'] ?? '';
+//         $financial_years = is_array($pick_val_raw)
+//             ? array_values($pick_val_raw)
+//             : array_map('trim', explode("\n", $pick_val_raw));
+//         error_log("Financial Years (initial): " . print_r($financial_years, true));
+//     } else {
+//         error_log("No custom financial_years found.");
+//     }
 
-    if (!empty($pod_object['fields']['companies']['options']['pick_custom'])) {
-        $pick_val_raw = $pod_object['fields']['companies']['options']['pick_custom'] ?? '';
-        $companies = is_array($pick_val_raw)
-            ? array_values($pick_val_raw)
-            : array_map('trim', explode("\n", $pick_val_raw));
-        error_log("companies (initial): " . print_r($companies, true));
-    } else {
-        error_log("No custom companies found.");
-    }
+//     if (!empty($pod_object['fields']['companies']['options']['pick_custom'])) {
+//         $pick_val_raw = $pod_object['fields']['companies']['options']['pick_custom'] ?? '';
+//         $companies = is_array($pick_val_raw)
+//             ? array_values($pick_val_raw)
+//             : array_map('trim', explode("\n", $pick_val_raw));
+//         error_log("companies (initial): " . print_r($companies, true));
+//     } else {
+//         error_log("No custom companies found.");
+//     }
 
-    // Fetch Pods data
-    $download_form_raw = pods('form_download', [
-        'where' => 'form_type = "TDS"',
-        'limit' => -1
-    ]);
+//     // Fetch Pods data
+//     $download_form_raw = pods('form_download', [
+//         'where' => 'form_type = "TDS"',
+//         'limit' => -1
+//     ]);
 
-    $download_forms = [];
-    while ($download_form_raw->fetch()) {
-        array_push($download_forms, [
-            'name' => $download_form_raw->field('name'),
-            'form_description' => $download_form_raw->field('form_description'),
-            'form_title' => $download_form_raw->field('form_title'),
-            'form_type' => $download_form_raw->field('form_type'),
-            'form_url' => $download_form_raw->field('form_url')['guid'],
-        ]);
-    }
+//     $download_forms = [];
+//     while ($download_form_raw->fetch()) {
+//         array_push($download_forms, [
+//             'name' => $download_form_raw->field('name'),
+//             'form_description' => $download_form_raw->field('form_description'),
+//             'form_title' => $download_form_raw->field('form_title'),
+//             'form_type' => $download_form_raw->field('form_type'),
+//             'form_url' => $download_form_raw->field('form_url')['guid'],
+//         ]);
+//     }
 
-    error_log("download_forms0000----- (initial): " . print_r($download_forms, true));
-    
+//     error_log("download_forms0000----- (initial): " . print_r($download_forms, true));
 
-    $params = [
-        'limit' => -1,
-        'orderby' => 'created ASC'
-    ];
 
-    $pod = pods($pod_name, $params);
+//     $params = [
+//         'limit' => -1,
+//         'orderby' => 'created ASC'
+//     ];
 
-    return rest_ensure_response([
-        'financial_years' => $financial_years,
-        'companies'       => $companies,
-        'download_forms'  => $download_forms
-    ]);
-}
+//     $pod = pods($pod_name, $params);
+
+//     // Add these headers to allow all origins (for development)
+//     header("Access-Control-Allow-Origin: *");
+//     header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+//     header("Access-Control-Allow-Headers: Content-Type, Authorization, X-API-KEY");
+
+//     return rest_ensure_response([
+//         'financial_years' => $financial_years,
+//         'companies'       => $companies,
+//         'download_forms'  => $download_forms
+//     ]);
+// }
 
 // Register Routes
 function my_custom_register_otp_api_route()
@@ -365,11 +360,15 @@ function my_custom_register_otp_api_route()
         'permission_callback' => '__return_true',
     ]);
 
-    register_rest_route('api/v1', '/meta-options', [
-        'methods'  => 'GET',
-        'callback' => 'get_admin_pod_data_tds_option',
-        'permission_callback' => '__return_true', //  Set proper permissions
-    ]);
+    // register_rest_route('api/v1', '/meta-options', [
+    //     'methods'  => 'GET',
+    //     'callback' => 'get_admin_pod_data_tds_option',
+    //     'permission_callback' => '__return_true', //  Set proper permissions
+    // ]);
 }
 
 add_action('rest_api_init', 'my_custom_register_otp_api_route');
+
+// Optional: Register AJAX handlers (for legacy support)
+add_action('wp_ajax_handle_cfp_submit_tds_form', 'handle_cfp_submit_tds_form_custome_fn');
+add_action('wp_ajax_nopriv_handle_cfp_submit_tds_form', 'handle_cfp_submit_tds_form_custome_fn');
